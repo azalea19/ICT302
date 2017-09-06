@@ -76,7 +76,7 @@ namespace SportsKinematics.UI
             m_Popup = Instantiate(popup) as GameObject;
             Button b = GetComponent<Button>();
 
-            m_Popup.transform.FindChild("Popup").GetComponent<Popup>().CallingButton = b;
+            m_Popup.transform.Find("Popup").GetComponent<Popup>().CallingButton = b;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace SportsKinematics.UI
             m_Popup = Instantiate(popup) as GameObject;
             Button b = GetComponent<Button>();
 
-            m_Popup.transform.FindChild("Popup").GetComponent<Popup>().CallingButton = b;
+            m_Popup.transform.Find("Popup").GetComponent<Popup>().CallingButton = b;
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace SportsKinematics.UI
                 }
                 else
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User already exists!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User already exists!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -362,20 +362,20 @@ namespace SportsKinematics.UI
             {
                 if (!userValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                     CreatePopup(Popup);
                     return;
                 }
 
                 if (!passValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
                     CreatePopup(Popup);
                     return;
                 }
                 if (!emailValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Email is empty or invalid!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Email is empty or invalid!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -435,14 +435,14 @@ namespace SportsKinematics.UI
                     else
                         if(!Match(pass, user.Password))
                         {
-                            Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
+                            Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
                             CreatePopup(Popup);
                             passInp.text = "";
                         }
                 }
                 else
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User does not exist!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User does not exist!";
                     CreatePopup(Popup);
                     userInp.text = "";
                     passInp.text = "";
@@ -452,13 +452,13 @@ namespace SportsKinematics.UI
             {
                 if (!userValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                     CreatePopup(Popup);
                     return;
                 }
                 if (!passValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -490,14 +490,14 @@ namespace SportsKinematics.UI
 
             if (!valid)
             {
-                Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                 CreatePopup(Popup);
                 return;
             }
 
             if (!Connectivity.CheckConnection())
             {
-                Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Internet connection is needed!";
+                Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Internet connection is needed!";
                 CreatePopup(Popup);
                 return;
             }
@@ -528,7 +528,7 @@ namespace SportsKinematics.UI
 
             EmailDetails em = new EmailDetails(recipient, senderEmail, pass, senderName, host);
 
-            Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "An email has been sent to your account.";
+            Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "An email has been sent to your account.";
 
             em.Subject = subject;
             em.Body = body;
@@ -615,7 +615,7 @@ namespace SportsKinematics.UI
 
             userManager.GetComponent<UserManager>().Save(u);
 
-            popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Successfully edited your account details.";
+            popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Successfully edited your account details.";
             CreatePopup(popup, NoFunc);
         }
     }

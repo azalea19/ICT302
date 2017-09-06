@@ -81,7 +81,7 @@ namespace SportsKinematics.UI
 
             m_userManager.GetComponent<UserManager>().Load(username);
 
-            m_mainMenu.transform.FindChild("WelcomeText").GetComponent<Text>().text = "Welcome,\n" + nameFinal;
+            m_mainMenu.transform.Find("WelcomeText").GetComponent<Text>().text = "Welcome,\n" + nameFinal;
             Switch();
         }
     }
