@@ -1,0 +1,46 @@
+Initialize engine version: 5.6.0f3 (497a0f351392)
+GfxDevice: creating device client; threaded=1
+VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_PathRegistryNotFound: "Installation path could not be located (110)"!
+ 
+(Filename:  Line: 1028)
+
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: NVIDIA GeForce 920M (ID=0x1299)
+    Vendor:   NVIDIA
+    VRAM:     2020 MB
+    Driver:   21.21.13.6909
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.VR.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\UnityEngine.VR.dll into Unity Child Domain
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\System.Drawing.dll (this message is harmless)
+Loading C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\System.Drawing.dll into Unity Child Domain
+- Completed reload, in  0.021 seconds
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Aiden\Documents\ICT302\Project\Sports-Kinematics\Point Light_Data\Managed\System.dll (this message is harmless)
+<RI> Initializing input.
+<RI> Input initialized.
+desktop: 1366x768 60Hz; virtual: 3286x1080 at -1920,0
+<RI> Initialized touch support.
+VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_PathRegistryNotFound: "Installation path could not be located (110)"!
+ 
+(Filename:  Line: 1028)
+
+VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_PathRegistryNotFound: "Installation path could not be located (110)"!
+ 
+(Filename:  Line: 1028)
+
+UnloadTime: 0.911408 ms
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: 2d64 -> priority: 1 
+  Thread -> id: 17b4 -> priority: 1 
