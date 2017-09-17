@@ -121,7 +121,7 @@ public class CreativeBall : MonoBehaviour {
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "player_Paddle")
+        if (collision.gameObject.transform.parent.gameObject.name  == "vive_Striker")
         {
             m_isHitByPlayer = true;
         }

@@ -65,6 +65,7 @@ namespace SportsKinematics
         /// <param name="co">collider for ball</param>
         void OnTriggerEnter(Collider co)
         {
+            Debug.Log(co.name);
             if (co.name.Equals("Ball"))
             {
                 m_distance = Vector3.Distance(co.transform.position, transform.position);

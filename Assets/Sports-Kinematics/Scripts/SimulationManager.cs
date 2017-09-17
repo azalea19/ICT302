@@ -16,7 +16,7 @@ namespace SportsKinematics
     {
         /// <summary>
         /// Path to the playlist to be used in the simulation.
-        /// </summary>
+        /// </summary>.
         private string m_fileName;
         /// <summary>
         /// Data for the playlist currently active in the simulation.
