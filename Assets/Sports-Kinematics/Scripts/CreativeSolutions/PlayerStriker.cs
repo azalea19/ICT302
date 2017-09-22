@@ -6,24 +6,29 @@ namespace SportsKinematics
 {
     public class PlayerStriker : Striker
     {
-        SortedList<float, StrikerData> playerStrikerData;
+        SortedList<float, StrikerData> m_playerStrikerData;
 
         // Update is called once per frame
         void Update()
         {
-            if (GetTime() > 0)
+            if (GetTime() > 0 && !m_playerStrikerData.ContainsKey(GetTime()))
             {
                 StrikerData tmp = new StrikerData();
                 tmp.position = this.transform.position;
                 tmp.rotation = this.transform.rotation.eulerAngles;
 
-                playerStrikerData.Add(GetTime(), tmp);
+                m_playerStrikerData.Add(GetTime(), tmp);
             }
         }
 
-        void ClearData()
+        public void ClearData()
         {
-            playerStrikerData.Clear();
+            m_playerStrikerData = new SortedList<float, StrikerData>();
+        }
+
+        public SortedList<float, StrikerData> GetData()
+        {
+            return m_playerStrikerData;
         }
 
         float GetTime()
@@ -31,9 +36,10 @@ namespace SportsKinematics
             return m_simManager.GetComponent<SimulationManager>().m_time;
         }
 
-        void SetOccluded(bool newOcclusion)
+        public void SetOccluded(bool newOcclusion)
         {
-            this.GetComponent<Renderer>().enabled = newOcclusion;
+            if(m_currentStriker != null)
+                m_currentStriker.GetComponent<Renderer>().enabled = newOcclusion;
         }
     }
 }

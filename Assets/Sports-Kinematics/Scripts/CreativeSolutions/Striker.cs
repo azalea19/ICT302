@@ -11,6 +11,8 @@ namespace SportsKinematics
         public GameObject m_catch;
         public GameObject m_simManager;
 
+        protected GameObject m_currentStriker;
+
         public enum StrikerSelection
         {
             //catch renderes no striker object
@@ -26,10 +28,10 @@ namespace SportsKinematics
             switch (m_StrikerSelection)
             {
                 case StrikerSelection.TableTennis:
-                    Object.Instantiate(m_tableTennisBat, this.transform);
+                    m_currentStriker = Object.Instantiate(m_tableTennisBat, this.transform);
                     break;
                 case StrikerSelection.Catch:
-                    Object.Instantiate(m_catch, this.transform);
+                    m_currentStriker = Object.Instantiate(m_catch, this.transform);
                     break;
             }
 

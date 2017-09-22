@@ -9,7 +9,7 @@ namespace SportsKinematics
     public class SimulationResults : MonoBehaviour
     {
         private float m_smallestDistToStriker; //The smallest  distance from the paddle to the ball, used for the results at the end if the ball was not hit
-        private float m_smallestDistTime;      //The frame in which the smallest distance occurred, this is so there is potential for the exact frame to be simulated to show the setup of the scene at that point.
+        public float m_smallestDistTime;      //The frame in which the smallest distance occurred, this is so there is potential for the exact frame to be simulated to show the setup of the scene at that point.
         public bool m_isHitByPlayer { get; set; }            //If the ball hit theplayers paddle, used for the result
         public float m_hitTime;     //The time when the players paddle hit the ball
         private Vector3 m_directionToBall;   //direction to the ball from striker
@@ -67,8 +67,8 @@ namespace SportsKinematics
             {
                 results += "Ball missed.";
                 results += "Striker was closest to the paddle at: " + m_smallestDistTime + "\n";
-                results += "The distance between the ball and paddle was: " + m_smallestDistToStriker + "\n";
-                results += "The direction from the paddle to the ball was:\n";
+                results += "The distance between the ball and paddle: " + m_smallestDistToStriker + "\n";
+                results += "The direction and distance from the paddle to the ball:\n";
                 results += "X axis (Left/Right): " + m_directionToBall.x + "\n";
                 results += "Y axis (Up/Down): " + m_directionToBall.y + "\n";
                 results += "Z axis (Forward/Back): " + m_directionToBall.z + "\n";
@@ -87,6 +87,15 @@ namespace SportsKinematics
         {
             Vector3 direction = m_playerPaddle.transform.position - m_ball.transform.position;
             return direction;
+        }
+
+        public void ClearResults()
+        {
+            m_smallestDistToStriker = GetDistanceToStriker();
+            m_smallestDistTime = 0;
+            m_directionToBall = new Vector3(0, 0, 0);
+            m_isHitByPlayer = false;
+            m_hitTime = 0;
         }
     }
 }

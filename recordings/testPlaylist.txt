@@ -1,1 +1,1 @@
-test,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt, 
+test,recordings/ball.txt,recordings/paddle.txt,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt, 

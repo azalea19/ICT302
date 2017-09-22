@@ -45,20 +45,23 @@ namespace SportsKinematics
                 while (!reader.EndOfStream)
                 {
                     var line = reader.ReadLine();
-                    var data = line.Split(',');
+                    if (line != null && line != string.Empty)
+                    {
+                        var data = line.Split(',');
 
-                    StrikerData tmpData = new StrikerData();
-                    tmpData.position.x = float.Parse(data[0], CultureInfo.InvariantCulture.NumberFormat);
-                    tmpData.position.y = float.Parse(data[1], CultureInfo.InvariantCulture.NumberFormat);
-                    tmpData.position.z = float.Parse(data[2], CultureInfo.InvariantCulture.NumberFormat);
+                        StrikerData tmpData = new StrikerData();
+                        tmpData.position.x = float.Parse(data[0], CultureInfo.InvariantCulture.NumberFormat);
+                        tmpData.position.y = float.Parse(data[1], CultureInfo.InvariantCulture.NumberFormat);
+                        tmpData.position.z = float.Parse(data[2], CultureInfo.InvariantCulture.NumberFormat);
 
-                    tmpData.rotation.x = float.Parse(data[3], CultureInfo.InvariantCulture.NumberFormat);
-                    tmpData.rotation.y = float.Parse(data[4], CultureInfo.InvariantCulture.NumberFormat);
-                    tmpData.rotation.z = float.Parse(data[5], CultureInfo.InvariantCulture.NumberFormat);
+                        tmpData.rotation.x = float.Parse(data[3], CultureInfo.InvariantCulture.NumberFormat);
+                        tmpData.rotation.y = float.Parse(data[4], CultureInfo.InvariantCulture.NumberFormat);
+                        tmpData.rotation.z = float.Parse(data[5], CultureInfo.InvariantCulture.NumberFormat);
 
-                    float time = float.Parse(data[6], CultureInfo.InvariantCulture.NumberFormat);
+                        float time = float.Parse(data[6], CultureInfo.InvariantCulture.NumberFormat);
 
-                    actionStrikerData.Add(time, tmpData);
+                        actionStrikerData.Add(time, tmpData);
+                    }
                 }
             }
 

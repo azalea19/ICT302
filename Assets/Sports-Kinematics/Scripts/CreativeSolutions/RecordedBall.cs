@@ -87,7 +87,6 @@ namespace SportsKinematics
             m_actionBallKeys = new List<float>(newBallData.Keys);
             
             m_actionBallKeys.Sort();
-            Debug.Log(m_actionBallKeys.Count);
         }
 
         Vector3 GetPosition(float currentTime)   //Gets the balls position at a specified frame from the data files, and interpolates value if the exact data cant be found

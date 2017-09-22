@@ -10,7 +10,6 @@ namespace SportsKinematics
     {
         private SortedList<float, StrikerData> m_actionStrikerData;   //The recorded ball data for this recording
         private List<float> m_actionStrikerKeys;   //The time keys, used to get data and interpolate
-        private GameObject m_striker;
 
         void Start()
         {
@@ -20,10 +19,10 @@ namespace SportsKinematics
             switch (m_StrikerSelection)
             {
                 case StrikerSelection.TableTennis:
-                    m_striker = Object.Instantiate(m_tableTennisBat, this.transform);
+                    m_currentStriker = Object.Instantiate(m_tableTennisBat, this.transform);
                     break;
                 case StrikerSelection.Catch:
-                    m_striker = Object.Instantiate(m_catch, this.transform);
+                    m_currentStriker = Object.Instantiate(m_catch, this.transform);
                     break;
             }
 
@@ -37,11 +36,11 @@ namespace SportsKinematics
 
             if (GetOcclusion(GetCurrentTime()) == true)     //If the file says the ball should be occluded this frame
             {
-                m_striker.GetComponent<Renderer>().enabled = false;      //Then make the object invisible
+                m_currentStriker.GetComponent<Renderer>().enabled = false;      //Then make the object invisible
             }
             else
             {
-                m_striker.GetComponent<Renderer>().enabled = true;   //make the object visible
+                m_currentStriker.GetComponent<Renderer>().enabled = true;   //make the object visible
             }
         }
 
