@@ -23,13 +23,13 @@ namespace SportsKinematics
         private bool m_isPaused;
         private bool m_displayResult;
         private GameObject m_recordedPlayerStriker;
+        private float m_countdownTimer;
 
         public GameObject m_ball;
         public GameObject m_opponentSkeleton;
         public GameObject m_opponentStriker;
         public GameObject m_playerStriker;
         public float m_time;
-        public float m_countdownTimer;
         public GameObject m_VRText;
         void Start()
         {
@@ -50,8 +50,8 @@ namespace SportsKinematics
             FileNames actionFilePaths = m_dataReader.ReadActionHeader(actionHeaderPath);
             SortedList<float, BallData> actionBallData = m_dataReader.ReadBall(actionFilePaths.ballDataFileName);
             SortedList<float, StrikerData> actionStrikerData = m_dataReader.ReadStriker(actionFilePaths.strikerDataFileName);
-            /*SortedList<float, SkeletonData> actionSkeletonData = m_dataReader.ReadSkeleton(actionFilePaths.skeletonDataFileName);
-            ConfigData actionConfigData = m_dataReader.ReadConfig(actionFilePaths.configDataFileName);
+            SortedList<float, SkeletonData> actionSkeletonData = m_dataReader.ReadSkeleton(actionFilePaths.skeletonDataFileName);
+            /*ConfigData actionConfigData = m_dataReader.ReadConfig(actionFilePaths.configDataFileName);
 
             List<float> times = new List<float>(actionBallData.Keys);
             for (int i = 0; i < times.Count; i++)
@@ -103,7 +103,7 @@ namespace SportsKinematics
             */
             m_ball.GetComponent<RecordedBall>().SetData(actionBallData);
             m_opponentStriker.GetComponent<RecordedStriker>().SetData(actionStrikerData);
-            //m_opponentSkeleton.GetComponent<RecordedSkeleton>().SetData(actionSkeletonData);
+            m_opponentSkeleton.GetComponent<RecordedSkeleton>().SetData(actionSkeletonData);
             m_actionEndTime = 15;
             m_actionName = actionFilePaths.actionName;
         }
@@ -194,17 +194,6 @@ namespace SportsKinematics
                 return 0;
         }
 
-        /// <summary>
-        /// Deserializes the specified playlist form file.
-        /// </summary>
-        /// <param name="fileName">File name the playlist to load.</param>
-        /// <param name="folderName">Path to the playlist data folder,</param>
-        /// <returns>The deserialised playlist object.</returns>
-        private Playlist LoadPlaylist(string fileName, string folderName)//FR1 - Virtual opponent modelling from captured data.
-        {
-            return Serial<Playlist>.Load(fileName, folderName);
-        }
-
         private void PlaySim()
         {
             m_isPaused = false;
@@ -283,16 +272,6 @@ namespace SportsKinematics
                 HideResult();
             }
             PlaySim();
-        }
-
-        /// <summary>
-        /// Deserializes the specified playlist form file.
-        /// </summary>
-        /// <param name="fileName">File name the playlist to load.</param>
-        /// <returns>The deserialised playlist object.</returns>
-        public Playlist LoadPlaylist(string fileName)//FR1 - Virtual opponent modelling from captured data.
-        {
-            return Serial<Playlist>.Load(fileName);
         }
     }
 }

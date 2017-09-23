@@ -17,7 +17,7 @@ public struct StrikerData
     public bool isOccluded;
 }
 
-public struct Joint
+public struct SJoint
 {
     public string name;
     public Vector3 position;
@@ -26,7 +26,7 @@ public struct Joint
 
 public struct SkeletonData
 {
-    public List<Joint> joints;
+    public List<SJoint> joints;
 }
 
 public struct ConfigData

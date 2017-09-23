@@ -20,8 +20,8 @@ namespace SportsKinematics
 
         void Start()
         {
-            //m_actionBallData = new SortedList<float, BallData>();
-            //m_actionBallKeys = new List<float>();
+            m_actionBallData = new SortedList<float, BallData>();
+            m_actionBallKeys = new List<float>();
         }
 
         // Update is called once per frame
