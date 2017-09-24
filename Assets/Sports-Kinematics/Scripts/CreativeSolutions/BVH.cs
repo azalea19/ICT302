@@ -117,7 +117,7 @@ namespace SportsKinematics
                     line = reader.ReadLine();
                     line = line.Replace("\t", string.Empty);
 
-                    data = line.Split(new char[] { ' ', ':', ',', '/', 't', '\'' });
+                    data = line.Split(new char[] { ' ', ':', ',', '/', '\'' });
 
                     if (line != null && line != string.Empty)
                     {
@@ -219,8 +219,6 @@ namespace SportsKinematics
                             }
                         }
 
-                        Debug.Log(data[0]);
-
                         if (data[0].Equals("MOTION"))
                             break;
                     }
@@ -245,6 +243,7 @@ namespace SportsKinematics
                     goto bvh_error;
                 interval = double.Parse(data[1]);
                 num_channel = channels.Count;
+                //num_frame = 21;
                 motion = new double[num_frame * num_channel];
 
                 for (i = 0; i < num_frame; i++)
@@ -263,13 +262,18 @@ namespace SportsKinematics
                 is_load_success = true;
             }
 
+            for(int k = 0; k < motion.Count<double>(); k++)
+            {
+                //Debug.Log(motion[k]);
+            }
+
             return;
 
             bvh_error:
                 Debug.Log("BVH load error");
         }
 
-        List<SJoint> GetJointPoints(Joint joint, double[] data, int startIndex, float scale, Vector3 parentBonePos)
+        List<SJoint> GetJointPoints(Joint joint, double[] data, int startIndex, float scale, Vector3 parentBonePos, Vector3 parentBoneRot)
         {
             List<SJoint> allJoints = new List<SJoint>();
             SJoint currentJoint = new SJoint();
@@ -278,28 +282,39 @@ namespace SportsKinematics
             if (joint.parent == null )
 	        {
                 currentJoint.position = new Vector3((float)data[startIndex] * scale, (float)data[startIndex + 1] * scale, (float)data[startIndex + 2] * scale) + parentBonePos;
+                //parentBonePos = currentJoint.position;
             }
 	        else
 	        {
                 currentJoint.position = new Vector3(joint.offset[0] * scale, joint.offset[1] * scale, joint.offset[2] * scale) + parentBonePos;
             }
 
-	        for (int i = 0; i < joint.channels.Count; i++)
+            for (int i = 0; i < joint.channels.Count; i++)
 	        {
 		        Channel channel = joint.channels[i];
                 if (channel.type == ChannelEnum.X_ROTATION)
-                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3((float)data[channel.index], 0,0));
+                {
+                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3((float)data[channel.index + startIndex] + parentBoneRot.x, 0, 0));
+                    parentBoneRot +=  new Vector3((float)data[channel.index + startIndex], 0, 0);
+                }
                 else if (channel.type == ChannelEnum.Y_ROTATION)
-                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3(0, (float)data[channel.index], 0));
+                {
+                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3(0, (float)data[channel.index + startIndex] + parentBoneRot.y, 0));
+                    parentBoneRot += new Vector3(0, (float)data[channel.index + startIndex], 0);
+                }
                 else if (channel.type == ChannelEnum.Z_ROTATION)
-                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3(0, 0, (float)data[channel.index]));
+                {
+                    currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3(0, 0, (float)data[channel.index + startIndex] + parentBoneRot.z));
+                    parentBoneRot += new Vector3(0, 0, (float)data[channel.index + startIndex]);
+                }
+
 	        }
 
             allJoints.Add(currentJoint);
 
             for (int i = 0; i < joint.children.Count; i++ )
 	        {
-                List<SJoint> returnedJoints = GetJointPoints(joint.children[i], data, startIndex, scale, currentJoint.position);
+                List<SJoint> returnedJoints = GetJointPoints(joint.children[i], data, startIndex, scale, currentJoint.position, parentBoneRot);
                 for(int k = 0; k < returnedJoints.Count; k++)
                 {
                     allJoints.Add(returnedJoints[k]);
@@ -314,7 +329,7 @@ namespace SportsKinematics
             SortedList<float, SkeletonData> skelData = new SortedList<float, SkeletonData>();
             for (int i = 0; i <= 1000; i++)
             {
-                List<SJoint> tmp = GetJointPoints(joints[0], motion, i * num_channel, scale, new Vector3(0,0,0));
+                List<SJoint> tmp = GetJointPoints(joints[0], motion, i * num_channel, scale, new Vector3(0,0,0), new Vector3(0,0,0));
                 SkeletonData tmpSkel = new SkeletonData();
                 tmpSkel.joints = tmp;
                 skelData.Add(i * (float)interval, tmpSkel);

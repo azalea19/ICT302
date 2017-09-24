@@ -21,10 +21,15 @@ namespace SportsKinematics
 
         void Update()
         {
+            Vector3 tran = new Vector3(0, -5, 0);
             for(int i = 0; i < actionSkeletonData[0].joints.Count; i++)
             {
                 if(!(GetPosition(GetCurrentTime(), actionSkeletonData[0].joints[i].name) == Vector3.zero))
-                    jointObjs[i].transform.position = GetPosition(GetCurrentTime(), actionSkeletonData[0].joints[i].name);
+                {
+                    jointObjs[i].transform.position = GetPosition(GetCurrentTime(), actionSkeletonData[0].joints[i].name) + tran;
+                    if(i + 1 < actionSkeletonData[0].joints.Count)
+                        Debug.DrawLine(jointObjs[i].transform.position, jointObjs[i + 1].transform.position, Color.red, 1.0f, false);
+                }
             }
         }
 
@@ -37,6 +42,7 @@ namespace SportsKinematics
             for (int i = 0; i < actionSkeletonData[0].joints.Count; i++)
             {
                 GameObject tmp = Instantiate(jointPrefab, this.transform);
+                tmp.name = actionSkeletonData[0].joints[i].name;
                 jointObjs.Add(tmp);
             }
         }
@@ -109,7 +115,6 @@ namespace SportsKinematics
                     //pos = this.transform.position; //if no data could be found (potentially out of recording data)
                 }
             }
-            Debug.Log(pos);
             return pos;
         }
     }
