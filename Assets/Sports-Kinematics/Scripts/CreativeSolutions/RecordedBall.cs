@@ -11,8 +11,8 @@ namespace SportsKinematics
         public GameObject m_playerPaddle;       //The player's paddle, used to detect the distance between the ball and paddle
         public GameObject m_results;
 
-        private SortedList<float, BallData> m_actionBallData;   //The recorded ball data for this recording
-        private List<float> m_actionBallKeys;   //The time keys, used to get data and interpolate
+        private SortedList<float, BallData> m_actionBallData = new SortedList<float, BallData>();   //The recorded ball data for this recording
+        private List<float> m_actionBallKeys = new List<float>();   //The time keys, used to get data and interpolate
 
         public AudioClip m_hitSound;
         public GameObject m_simManager;
@@ -20,8 +20,7 @@ namespace SportsKinematics
 
         void Start()
         {
-            m_actionBallData = new SortedList<float, BallData>();
-            m_actionBallKeys = new List<float>();
+
         }
 
         // Update is called once per frame
