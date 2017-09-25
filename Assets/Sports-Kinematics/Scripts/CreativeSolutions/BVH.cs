@@ -10,7 +10,7 @@ namespace SportsKinematics
     //Based on the design by Dr Masaki OSHITA
     public class BVH : MonoBehaviour
     {
-        enum ChannelEnum
+        public enum ChannelEnum
         {
             X_ROTATION,
             Y_ROTATION,
@@ -20,14 +20,14 @@ namespace SportsKinematics
             Z_POSITION
         };
 
-        struct Channel
+        public struct Channel
         {
             public Joint joint;
             public ChannelEnum type;
             public int index;
         };
 
-        class Joint
+        public class Joint
         {
             public string name;
             public int index;
@@ -45,14 +45,14 @@ namespace SportsKinematics
         string file_name { get; set; }
         string motion_name { get; set; }
 
-        int num_channel { get; set; }
-        List<Channel> channels { get; set; }
-        List<Joint> joints { get; set; }
-        Dictionary<string, Joint> joint_index { get; set; }
+        public int num_channel { get; set; }
+        public List<Channel> channels { get; set; }
+        public List<Joint> joints { get; set; }
+        public Dictionary<string, Joint> joint_index { get; set; }
 
-        int num_frame { get; set; }
-        double interval { get; set; }
-        double []motion { get; set; }
+        public int num_frame { get; set; }
+        public double interval { get; set; }
+        public double[]motion { get; set; }
 
         Channel GetChannel(int no)
         {
@@ -293,23 +293,15 @@ namespace SportsKinematics
                 Channel channel = joint.channels[i];
                 if (channel.type == ChannelEnum.X_ROTATION)
                 {
-                    //x = (float)data[channel.index + startIndex] + parentBoneRot.x;
-                    //y = (float)data[channel.index + startIndex] + parentBoneRot.y;
                     z = (float)data[channel.index + startIndex] + parentBoneRot.z;
                 }
                 else if (channel.type == ChannelEnum.Y_ROTATION)
                 {
                     y = (float)data[channel.index + startIndex] + parentBoneRot.y;
-                    //x = (float)data[channel.index + startIndex] + parentBoneRot.x;
-                    //z = (float)data[channel.index + startIndex] + parentBoneRot.z;
                 }
                 else if (channel.type == ChannelEnum.Z_ROTATION)
                 {
-                    //z = (float)data[channel.index + startIndex] + parentBoneRot.z;
-                    //y = (float)data[channel.index + startIndex] + parentBoneRot.y;
                     x = (float)data[channel.index + startIndex] + parentBoneRot.x;
-                    //currentJoint.position = RotateAroundPoint(currentJoint.position, parentBonePos, new Vector3(0, 0, (float)data[channel.index + startIndex] + parentBoneRot.z));
-                    //parentBoneRot += new Vector3(0, 0, (float)data[channel.index + startIndex]);
                 }
 
 	        }

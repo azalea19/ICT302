@@ -9,7 +9,7 @@ namespace SportsKinematics
     public class RecordedSkeleton : MonoBehaviour
     {
         public GameObject m_simManager;
-        SortedList<float, SkeletonData> actionSkeletonData = new SortedList<float, SkeletonData>();
+        BVH actionSkeletonData;
         List<float> actionSkeletonKeys = new List<float>();
         List<GameObject> jointObjs = new List<GameObject>();
         public GameObject jointPrefab;
@@ -22,7 +22,10 @@ namespace SportsKinematics
         void Update()
         {
             Vector3 tran = new Vector3(0, -5, 0);
-            for(int i = 0; i < actionSkeletonData[0].joints.Count; i++)
+
+            DrawSkeletonAtTime(GetCurrentTime(), actionSkeletonData.joints[0]);
+
+            /*for(int i = 0; i < actionSkeletonData[0].joints.Count; i++)
             {
                 if(!(GetPosition(GetCurrentTime(), actionSkeletonData[0].joints[i].name) == Vector3.zero))
                 {
@@ -30,20 +33,107 @@ namespace SportsKinematics
                     if(i + 1 < actionSkeletonData[0].joints.Count)
                         Debug.DrawLine(jointObjs[i].transform.position, jointObjs[i + 1].transform.position, Color.red, 1.0f, false);
                 }
+            }*/
+        }
+
+        private void DrawSkeletonAtTime(float time, BVH.Joint currentJoint)
+        {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+
+            int lowerFrame = Mathf.CeilToInt(time / ((float)actionSkeletonData.interval * 1));
+            int frameMotionIndex = lowerFrame * (actionSkeletonData.num_channel);
+
+            if (string.Equals(currentJoint.name, "Hips"))
+            {
+                for (int i = 0; i < jointObjs.Count; i++)
+                {
+                    if (string.Equals(jointObjs[i].name, "Hips"))
+                    {
+                        jointObjs[i].transform.position = new Vector3((float)actionSkeletonData.motion[frameMotionIndex],
+                            (float)actionSkeletonData.motion[frameMotionIndex + 1],
+                            (float)actionSkeletonData.motion[frameMotionIndex + 2]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < currentJoint.channels.Count; i++)
+            {
+                BVH.Channel channel = currentJoint.channels[i];
+
+                if (channel.type == BVH.ChannelEnum.X_ROTATION)
+                {
+                    x = (float)actionSkeletonData.motion[channel.index + frameMotionIndex];                 
+                }
+                else if (channel.type == BVH.ChannelEnum.Y_ROTATION)
+                {
+                    y = (float)actionSkeletonData.motion[channel.index + frameMotionIndex];
+                }
+                else if (channel.type == BVH.ChannelEnum.Z_ROTATION)
+                {
+                    z = (float)actionSkeletonData.motion[channel.index + frameMotionIndex];
+                }
+            }
+
+            for(int i = 0; i < jointObjs.Count; i++)
+            {
+                if(string.Equals(jointObjs[i].name, currentJoint.name))
+                {
+                    Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(x, y, z));
+                    //jointObjs[i].transform.localRotation = tmpQuaternion;
+                    //if(!string.Equals(jointObjs[i].name,"Hips"))
+                    //{
+                        //Debug.Log(new Vector3(x, y, z));
+                        jointObjs[i].transform.localRotation = tmpQuaternion;
+                    //}
+                        
+
+                    //jointObjs[i].transform.RotateAround(jointObjs[i].transform.parent.position, new Vector3(1, 0, 0), x);// = tmpQuaternion;// (new Vector3(1,0,0), x);
+                }
+            }
+
+            for(int i = 0; i < currentJoint.children.Count; i++)
+            {
+                DrawSkeletonAtTime(time, currentJoint.children[i]);
+            }
+
+        }
+
+        public void SetData(BVH newData)
+        {
+            actionSkeletonData = newData;
+            //actionSkeletonKeys = new List<float>(actionSkeletonData.Keys);
+            //actionSkeletonKeys.Sort();
+            DeleteSkeleton(jointObjs);
+            jointObjs = new List<GameObject>();
+
+            GameObject root = Instantiate(jointPrefab, this.transform);
+            root.name = newData.joints[0].name;
+            root.transform.position += newData.joints[0].offset;
+            jointObjs.Add(root);
+            CreateSkeleton(newData.joints[0], root.transform);
+
+        }
+
+        private void DeleteSkeleton(List<GameObject> allJoints)
+        {
+            for(int i = 0; i < allJoints.Count; i++)
+            {
+                GameObject.Destroy(allJoints[i]);
             }
         }
 
-        public void SetData(SortedList<float, SkeletonData> newData)
+        private void CreateSkeleton(BVH.Joint joint, Transform parentJoint)
         {
-            actionSkeletonData = newData;
-            actionSkeletonKeys = new List<float>(actionSkeletonData.Keys);
-            actionSkeletonKeys.Sort();
-            jointObjs = new List<GameObject>();
-            for (int i = 0; i < actionSkeletonData[0].joints.Count; i++)
+
+            for (int i = 0; i < joint.children.Count; i++)
             {
-                GameObject tmp = Instantiate(jointPrefab, this.transform);
-                tmp.name = actionSkeletonData[0].joints[i].name;
+                GameObject tmp = Instantiate(jointPrefab, parentJoint);
+                tmp.transform.position += joint.children[i].offset;
+                tmp.name = joint.children[i].name;
                 jointObjs.Add(tmp);
+                CreateSkeleton(joint.children[i], tmp.transform);
             }
         }
 
@@ -66,7 +156,7 @@ namespace SportsKinematics
             return new SJoint();
         }
 
-        Vector3 GetPosition(float currentTime, string jointName)   //Gets the balls position at a specified frame from the data files, and interpolates value if the exact data cant be found
+     /*   Vector3 GetPosition(float currentTime, string jointName)   //Gets the balls position at a specified frame from the data files, and interpolates value if the exact data cant be found
         {
             Vector3 pos = new Vector3();
             SkeletonData tmp = new SkeletonData();
@@ -116,6 +206,6 @@ namespace SportsKinematics
                 }
             }
             return pos;
-        }
+        }*/
     }
 }

@@ -50,7 +50,7 @@ namespace SportsKinematics
             FileNames actionFilePaths = m_dataReader.ReadActionHeader(actionHeaderPath);
             SortedList<float, BallData> actionBallData = m_dataReader.ReadBall(actionFilePaths.ballDataFileName);
             SortedList<float, StrikerData> actionStrikerData = m_dataReader.ReadStriker(actionFilePaths.strikerDataFileName);
-            SortedList<float, SkeletonData> actionSkeletonData = m_dataReader.ReadSkeleton(actionFilePaths.skeletonDataFileName);
+            BVH actionSkeletonData = m_dataReader.ReadSkeleton(actionFilePaths.skeletonDataFileName);
             /*ConfigData actionConfigData = m_dataReader.ReadConfig(actionFilePaths.configDataFileName);
 
             List<float> times = new List<float>(actionBallData.Keys);

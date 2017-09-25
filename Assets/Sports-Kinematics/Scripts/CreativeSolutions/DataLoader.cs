@@ -68,10 +68,10 @@ namespace SportsKinematics
             return actionStrikerData;
         }
 
-        public SortedList<float, SkeletonData> ReadSkeleton(string fileName)
+        public BVH ReadSkeleton(string fileName)
         {
             BVH bvhFile = new BVH(fileName);
-            return bvhFile.GetActionSkeletonData(1);
+            return bvhFile;
         }
 
         public ConfigData ReadConfig(string fileName)
