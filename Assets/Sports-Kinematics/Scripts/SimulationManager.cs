@@ -126,6 +126,7 @@ namespace SportsKinematics
                     }
                     else
                     {
+                        Debug.Log(m_results.GetResultsString());
                         m_VRText.GetComponent<TextMesh>().text = "Simulation Complete";
                     }
                 }

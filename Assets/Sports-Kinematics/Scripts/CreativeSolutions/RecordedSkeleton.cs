@@ -106,7 +106,11 @@ namespace SportsKinematics
 
         public void DrawBone(GameObject startJoint, GameObject endJoint)
         {
-            startJoint.AddComponent<LineRenderer>();
+            if(startJoint.GetComponent<LineRenderer>() == null)
+            {
+                startJoint.AddComponent<LineRenderer>();
+            }
+            
             LineRenderer lr = startJoint.GetComponent<LineRenderer>();
             lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
             lr.startColor = Color.red;
