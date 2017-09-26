@@ -44,18 +44,33 @@ namespace SportsKinematics
 
             int lowerFrame = Mathf.CeilToInt(time / ((float)actionSkeletonData.interval * 1));
             int frameMotionIndex = lowerFrame * (actionSkeletonData.num_channel);
+            GameObject currentObj = new GameObject();
+            List<GameObject> childrenObjs = new List<GameObject>();
 
-            if (string.Equals(currentJoint.name, "Hips"))
+            for (int i = 0; i < jointObjs.Count; i++)
+            {
+                if (string.Equals(jointObjs[i].name, currentJoint.name))
+                {
+                    currentObj = jointObjs[i];
+                }
+            }
+
+            for(int k = 0; k < currentJoint.children.Count; k ++)
             {
                 for (int i = 0; i < jointObjs.Count; i++)
                 {
-                    if (string.Equals(jointObjs[i].name, "Hips"))
+                    if (string.Equals(jointObjs[i].name, currentJoint.children[k].name))
                     {
-                        jointObjs[i].transform.position = new Vector3((float)actionSkeletonData.motion[frameMotionIndex],
-                            (float)actionSkeletonData.motion[frameMotionIndex + 1],
-                            (float)actionSkeletonData.motion[frameMotionIndex + 2]);
+                        childrenObjs.Add(jointObjs[i]);
                     }
                 }
+            }
+
+            if (string.Equals(currentJoint.name, "Hips"))
+            {
+                currentObj.transform.localPosition = new Vector3((float)actionSkeletonData.motion[frameMotionIndex],
+                    (float)actionSkeletonData.motion[frameMotionIndex + 1],
+                    (float)actionSkeletonData.motion[frameMotionIndex + 2]);
             }
 
             for (int i = 0; i < currentJoint.channels.Count; i++)
@@ -76,28 +91,28 @@ namespace SportsKinematics
                 }
             }
 
-            for(int i = 0; i < jointObjs.Count; i++)
-            {
-                if(string.Equals(jointObjs[i].name, currentJoint.name))
-                {
-                    Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(x, y, z));
-                    //jointObjs[i].transform.localRotation = tmpQuaternion;
-                    //if(!string.Equals(jointObjs[i].name,"Hips"))
-                    //{
-                        //Debug.Log(new Vector3(x, y, z));
-                        jointObjs[i].transform.localRotation = tmpQuaternion;
-                    //}
-                        
 
-                    //jointObjs[i].transform.RotateAround(jointObjs[i].transform.parent.position, new Vector3(1, 0, 0), x);// = tmpQuaternion;// (new Vector3(1,0,0), x);
-                }
-            }
+            Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(x, y, z));
+            currentObj.transform.localRotation = tmpQuaternion;
+
 
             for(int i = 0; i < currentJoint.children.Count; i++)
             {
+                DrawBone(currentObj, childrenObjs[i]);
                 DrawSkeletonAtTime(time, currentJoint.children[i]);
             }
 
+        }
+
+        public void DrawBone(GameObject startJoint, GameObject endJoint)
+        {
+            startJoint.AddComponent<LineRenderer>();
+            LineRenderer lr = startJoint.GetComponent<LineRenderer>();
+            lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+            lr.startColor = Color.red;
+            lr.startWidth = 0.1f;
+            lr.SetPosition(0, startJoint.transform.position);
+            lr.SetPosition(1, endJoint.transform.position);
         }
 
         public void SetData(BVH newData)
@@ -110,7 +125,7 @@ namespace SportsKinematics
 
             GameObject root = Instantiate(jointPrefab, this.transform);
             root.name = newData.joints[0].name;
-            root.transform.position += newData.joints[0].offset;
+            root.transform.localPosition = newData.joints[0].offset;
             jointObjs.Add(root);
             CreateSkeleton(newData.joints[0], root.transform);
 
@@ -130,8 +145,17 @@ namespace SportsKinematics
             for (int i = 0; i < joint.children.Count; i++)
             {
                 GameObject tmp = Instantiate(jointPrefab, parentJoint);
-                tmp.transform.position += joint.children[i].offset;
+                tmp.transform.localPosition = joint.children[i].offset;
                 tmp.name = joint.children[i].name;
+
+                tmp.AddComponent<LineRenderer>();
+                LineRenderer lr = tmp.GetComponent<LineRenderer>();
+                lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+                lr.startColor = Color.red;
+                lr.startWidth = 0.1f;
+                lr.SetPosition(0, tmp.transform.position);
+                lr.SetPosition(1, parentJoint.position);
+
                 jointObjs.Add(tmp);
                 CreateSkeleton(joint.children[i], tmp.transform);
             }
