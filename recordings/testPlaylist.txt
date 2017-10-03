@@ -1,1 +1,1 @@
-test,recordings/ball.txt,recordings/paddle.txt,recordings/skeleton.bvh,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt, 
+test,recordings/test3_WSLocations.txt,recordings/paddle.txt,recordings/skeleton.bvh,recordings/ball.txt,recordings/ball.txt,recordings/ball.txt, 

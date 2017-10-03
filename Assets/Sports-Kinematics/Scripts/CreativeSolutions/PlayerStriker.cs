@@ -6,7 +6,7 @@ namespace SportsKinematics
 {
     public class PlayerStriker : Striker
     {
-        SortedList<float, StrikerData> m_playerStrikerData;
+        SortedList<float, StrikerData> m_playerStrikerData = new SortedList<float, StrikerData>();
 
         // Update is called once per frame
         void Update()

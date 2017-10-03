@@ -104,7 +104,7 @@ namespace SportsKinematics
             m_ball.GetComponent<RecordedBall>().SetData(actionBallData);
             m_opponentStriker.GetComponent<RecordedStriker>().SetData(actionStrikerData);
             m_opponentSkeleton.GetComponent<RecordedSkeleton>().SetData(actionSkeletonData);
-            m_actionEndTime = 15;
+            m_actionEndTime = 30;
             m_actionName = actionFilePaths.actionName;
         }
 
@@ -240,12 +240,13 @@ namespace SportsKinematics
                 m_time = m_results.m_smallestDistTime;
             }
 
-            if(m_playerStriker.GetComponent<PlayerStriker>().GetData() != null)
-            {
+            //if(m_playerStriker.GetComponent<PlayerStriker>().GetData() != null)
+            //{
+                Debug.Log("Pass");
                 m_recordedPlayerStriker = Object.Instantiate(m_opponentStriker);
                 m_recordedPlayerStriker.GetComponent<RecordedStriker>().SetData(m_playerStriker.GetComponent<PlayerStriker>().GetData());
                 m_playerStriker.GetComponent<PlayerStriker>().SetOccluded(true);
-            }
+            //}
 
             m_isPaused = true;
             m_displayResult = true;

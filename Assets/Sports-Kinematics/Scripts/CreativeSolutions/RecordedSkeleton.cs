@@ -92,8 +92,16 @@ namespace SportsKinematics
             }
 
 
-            Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(x, y, z));
-            currentObj.transform.localRotation = tmpQuaternion;
+            
+            if (!string.Equals(currentJoint.name, "Hips"))
+            {
+                Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(x, y, z));
+                currentObj.transform.localRotation = tmpQuaternion;
+            }else
+            {
+                Quaternion tmpQuaternion = Quaternion.Euler(new Vector3(0, 0, 0));
+                currentObj.transform.localRotation = tmpQuaternion;
+            }
 
 
             for(int i = 0; i < currentJoint.children.Count; i++)

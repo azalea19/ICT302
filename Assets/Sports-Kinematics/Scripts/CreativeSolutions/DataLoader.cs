@@ -19,7 +19,7 @@ namespace SportsKinematics
                     var line = reader.ReadLine();
                     if (line != null && line != string.Empty)
                     {
-                        var data = line.Split(',');
+                        var data = line.Split(' ');
 
                         BallData tmpData = new BallData();
                         tmpData.position.x = float.Parse(data[0]);
