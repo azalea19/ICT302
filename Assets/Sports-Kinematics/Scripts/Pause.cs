@@ -61,5 +61,28 @@ namespace SportsKinematics.UI
                 m_ball.GetComponent<BallScript>().m_play = m_play;
             }
         }
+
+        public void TaskOnClick(bool playing)
+        {
+            m_play = playing;
+            if (!m_play)
+            {
+                m_text.text = "Play";
+            }
+            else
+            {
+                m_text.text = "Pause";
+            }
+
+            if (m_actionRenderer && m_actionRenderer.GetComponent<ActionRenderer>())
+            {
+                m_actionRenderer.GetComponent<ActionRenderer>().m_play = m_play;
+            }
+
+            if (m_ball && m_ball.GetComponent<BallScript>())
+            {
+                m_ball.GetComponent<BallScript>().m_play = m_play;
+            }
+        }
     }
 }

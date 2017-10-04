@@ -131,12 +131,12 @@ namespace SportsKinematics
                 float.TryParse(m_occlusionTimeInputField.text, out time);
                 m_newConfiguration.OcclusionTime = time/1000f; //convert to ms
             }
-
+            
             //Saving spatial occlusion settings.
             if (m_spatialIsActive.isOn)
             {
                 m_newConfiguration.SpatialIsActive = m_spatialIsActive.isOn;
-                m_newConfiguration.OcclusionArray = m_body.GetComponent<UI.BodyOcclusionTracker>().Occlusions;
+                 m_newConfiguration.OcclusionArray = m_body.GetComponent<UI.BodyOcclusionTracker>().Occlusions;
             }
             else
             {

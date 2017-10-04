@@ -69,33 +69,35 @@ namespace SportsKinematics.UI
         /// </summary>
         public void TaskOnPlayerValueChanged()//FR6 - UI environment for client/test administrator.
         {
-            if (m_text)
-            {
-                if (m_actionRender && m_text.text != "")
-                {
-                    float playerSpeedChange;
-                    float.TryParse(m_text.text, out playerSpeedChange);
-                    if(playerSpeedChange <= m_actionRender.MaxSpeed)
-                    {
-                        if (playerSpeedChange > 0.0f)
-                        {
-                            m_actionRender.m_speed = playerSpeedChange;
-                        }
-                        else
-                        {
-                            //clamp to 0
-                            m_actionRender.m_speed = 0.0f;
-                            m_text.text = "0";
-                        }
-                    }
-                    else
-                    {
-                        //clamp to m_actionRender.MaxSpeed
-                        m_actionRender.m_speed = m_actionRender.MaxSpeed;
-                        m_text.text = m_actionRender.MaxSpeed.ToString();
-                    }
-                }
-            }
+            //if (m_text)
+            //{
+            //    if (m_actionRender && m_text.text != "")
+            //    {
+            //        float playerSpeedChange;
+            //        float.TryParse(m_text.text, out playerSpeedChange);
+            //        if(playerSpeedChange <= m_actionRender.MaxSpeed)
+            //        {
+            //            if (playerSpeedChange > 0.0f)
+            //            {
+            //                Debug.Log("spee1d " + m_actionRender.m_speed);
+            //                m_actionRender.m_speed = playerSpeedChange;
+
+            //            }
+            //            else
+            //            {
+            //                //clamp to 0
+            //                m_actionRender.m_speed = 0.0f;
+            //                m_text.text = "0";
+            //            }
+            //        }
+            //        else
+            //        {
+            //            //clamp to m_actionRender.MaxSpeed
+            //            m_actionRender.m_speed = m_actionRender.MaxSpeed;
+            //            m_text.text = m_actionRender.MaxSpeed.ToString();
+            //        }
+            //    }
+            //}
         }
     }
 }
