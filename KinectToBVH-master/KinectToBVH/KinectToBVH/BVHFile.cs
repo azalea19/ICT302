@@ -35,7 +35,7 @@ namespace KinectToBVH
         public const int ROOT_CHANNEL_NUM = 6;
         public const double DOUBLE_FRAMERATE = 0.1 / 3.0;
 
-        public const string STRING_DEFAULTPATH = "d:/Kinect.bvh";
+        public const string STRING_DEFAULTPATH = "Kinect.bvh";
 
         //convert meter in kinect to centimeter in bvh
         public const double DOUBLE_KINECTTOBVHSCALERATE = 100;
@@ -85,18 +85,19 @@ namespace KinectToBVH
         /// <param name="path"></param>
         public void OutputBVHToFile()
         {
+            
             // if skeleton struture not clibrated or there is no motion frame, just return
             if (_structuredSkeleton.NeedBoneClibrated() || _frameCount == 0)
             {
                 return;
             }
-
+            
             StringBuilder wholeBVH = new StringBuilder();
             // HIRARCHY
             wholeBVH.Append(STR_HIERARCHY + CHAR_LF);
 
             // all the joints
-            buildBVHOutputSkeleton(_structuredSkeleton.HipCenter);
+            buildBVHOutputSkeleton(_structuredSkeleton.m_spineBase);
             wholeBVH.Append(_bvhSkeletonBuffer);
 
             // MOTION
@@ -108,12 +109,18 @@ namespace KinectToBVH
 
             // frames
             wholeBVH.Append(_bvhMotionFrameBuffer);
-
+            
             // write out
-            using (StreamWriter bvhStreamWriter = new StreamWriter(FilePath))
-            {
-                bvhStreamWriter.Write(wholeBVH.ToString());
-            }
+            //using (StreamWriter bvhStreamWriter = new StreamWriter(FilePath))
+            //{
+            //    bvhStreamWriter.Write(wholeBVH.ToString());
+            //    bvhStreamWriter.Close();
+            //}
+            StreamWriter file;
+            if (File.Exists(FilePath))
+                File.Delete(FilePath);
+            file = File.CreateText(FilePath);
+            file.Write(wholeBVH.ToString());
         }
 
         public static double BVHScaledValue(double origin)

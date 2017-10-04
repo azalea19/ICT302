@@ -49,22 +49,22 @@ namespace KinectToBVH
         /// Convert a kinect rotation matrix to Matrix3D
         /// </summary>
         /// <param name="kinectMatrix"></param>
-        /// <returns></returns>
-        public static Matrix3D Matrix4ToMatrix3D(Matrix4 kinectMatrix)
-        {
-            Matrix3D converted = new Matrix3D();
-            converted.M11 = kinectMatrix.M11;
-            converted.M12 = kinectMatrix.M12;
-            converted.M13 = kinectMatrix.M13;
-            converted.M21 = kinectMatrix.M21;
-            converted.M22 = kinectMatrix.M22;
-            converted.M23 = kinectMatrix.M23;
-            converted.M31 = kinectMatrix.M31;
-            converted.M32 = kinectMatrix.M32;
-            converted.M33 = kinectMatrix.M33;
-            converted.M44 = kinectMatrix.M44;
-            return converted;
-        }
+        ///// <returns></returns>
+        //public static Matrix3D Matrix4ToMatrix3D(Matrix4 kinectMatrix)
+        //{
+        //    Matrix3D converted = new Matrix3D();
+        //    converted.M11 = kinectMatrix.M11;
+        //    converted.M12 = kinectMatrix.M12;
+        //    converted.M13 = kinectMatrix.M13;
+        //    converted.M21 = kinectMatrix.M21;
+        //    converted.M22 = kinectMatrix.M22;
+        //    converted.M23 = kinectMatrix.M23;
+        //    converted.M31 = kinectMatrix.M31;
+        //    converted.M32 = kinectMatrix.M32;
+        //    converted.M33 = kinectMatrix.M33;
+        //    converted.M44 = kinectMatrix.M44;
+        //    return converted;
+        //}
 
         /// <summary>
         /// convert a radius to angle
@@ -225,7 +225,7 @@ namespace KinectToBVH
             return quaternion;
         }
 
-        public static Vector3D SkeletonPosToVector3d(SkeletonPoint skelPoint)
+        public static Vector3D SkeletonPosToVector3d(CameraSpacePoint skelPoint)
         {
             return new Vector3D(skelPoint.X, skelPoint.Y, skelPoint.Z);
         }

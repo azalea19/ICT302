@@ -17,7 +17,7 @@ namespace KinectToBVH
         private KinectSensor sensor;
 
         // under recording state or not
-        private bool underRecording = true;
+        private bool underRecording = false;
 
         // edge brush
         private Brush BRUSH_EDGE = Brushes.Red;
@@ -30,7 +30,7 @@ namespace KinectToBVH
         private const double DOUBLE_RADIUS_JOINT = 10;
         private Brush BRUSH_BACKGROUND = Brushes.Black;
         private Brush BRUSH_BACKGROUNDCLIBRATED = Brushes.DeepSkyBlue;
-
+        BodyFrameReader bReader = null;
         // skeleton structure
         private KinectSkeleton _kinectSkeleton;
 
@@ -42,14 +42,15 @@ namespace KinectToBVH
         private BVHFile bvhWriter;
 
         // skeleton smooth parameter
-        private TransformSmoothParameters smoothParam;
+        //private TransformSmoothParameters smoothParam;
 
         public MainWindow()
         {
             InitializeComponent();
             _kinectSkeleton = new KinectSkeleton();
-            bvhWriter = new BVHFile(_kinectSkeleton);
+            bvhWriter = new BVHFile(_kinectSkeleton,"kinect.bvh");
         }
+        
 
         /// <summary>
         /// Execute startup tasks
@@ -59,27 +60,28 @@ namespace KinectToBVH
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             // Look through all sensors and start the first connected one.
-            foreach (var potentialSensor in KinectSensor.KinectSensors)
-            {
-                if (potentialSensor.Status == KinectStatus.Connected)
-                {
-                    this.sensor = potentialSensor;
-                    break;
-                }
-            }
+
+            this.sensor = KinectSensor.GetDefault();
+              
+            
 
             if (null != this.sensor)
             {
                 // Turn on the skeleton stream to receive skeleton frames
                 setKinectSmoothParameter();
-                this.sensor.SkeletonStream.Enable(smoothParam);
+                //this.sensor.SkeletonStream.Enable(smoothParam);
 
-                // Add an event handler to be called whenever there is new frame data
-                this.sensor.SkeletonFrameReady += SensorSkeletonFrameReady;
+                //// Add an event handler to be called whenever there is new frame data
+                //this.sensor.SkeletonFrameReady += SensorSkeletonFrameReady;
+                bReader = sensor.BodyFrameSource.OpenReader();
+                if (bReader != null)
+                {
+                    bReader.FrameArrived += SensorSkeletonFrameReady;
+                }
                 // Start the sensor!
                 try
                 {
-                    this.sensor.Start();
+                    this.sensor.Open();
                 }
                 catch (IOException)
                 {
@@ -103,46 +105,46 @@ namespace KinectToBVH
         {
             if (null != this.sensor)
             {
-                this.sensor.Stop();
+                this.sensor.Close();
             }
 
-            bvhWriter.OutputBVHToFile();
+           // bvhWriter.OutputBVHToFile();
         }
 
         private void setKinectSmoothParameter()
         {
-            this.smoothParam = new TransformSmoothParameters();
-            smoothParam.Smoothing = 0.5f; // 0-1, bigger - smoother
-            smoothParam.Correction = 0.5f; // 0-1, smaller - smoother
-            smoothParam.Prediction = 1.0f;
-            smoothParam.JitterRadius = 1.0f;
-            smoothParam.MaxDeviationRadius = 1.0f;
+            //this.smoothParam = new TransformSmoothParameters();
+            //smoothParam.Smoothing = 0.5f; // 0-1, bigger - smoother
+            //smoothParam.Correction = 0.5f; // 0-1, smaller - smoother
+            //smoothParam.Prediction = 1.0f;
+            //smoothParam.JitterRadius = 1.0f;
+            //smoothParam.MaxDeviationRadius = 1.0f;
         }
 
-        private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        private void SensorSkeletonFrameReady(object sender, BodyFrameArrivedEventArgs e)
         {
-            Skeleton[] skeletons = new Skeleton[0];
+            Body[] skeletons = new Body[0];
             long frameTimeStamp = 0;
 
-            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
+            using (BodyFrame skeletonFrame = e.FrameReference.AcquireFrame())
             {
                 if (skeletonFrame != null)
                 {
-                    skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
-                    skeletonFrame.CopySkeletonDataTo(skeletons);
-                    frameTimeStamp = skeletonFrame.Timestamp;
+                    skeletons = new Body[skeletonFrame.BodyCount];
+                    skeletonFrame.GetAndRefreshBodyData(skeletons);
+                    //frameTimeStamp = skeletonFrame.Timestamp;
                 }
             }
 
             if (skeletons.Length != 0)
             {
                 canvas.Children.Clear();
-                foreach (Skeleton skel in skeletons)
+                foreach (Body skel in skeletons)
                 {
                     // render clipped edges
                     renderClippedEdges(skel);
 
-                    if (SkeletonTrackingState.Tracked == skel.TrackingState)
+                    if (skel.IsTracked)
                     {
                         // clibrate the bones if not done yet
                         _kinectSkeleton.CliberateSkeleton(skel);
@@ -172,7 +174,7 @@ namespace KinectToBVH
         /// add extra edge to viewport if the related edge is clipped by kinect
         /// </summary>
         /// <param name="skeleton"></param>
-        private void renderClippedEdges(Skeleton skeleton)
+        private void renderClippedEdges(Body skeleton)
         {
             double halfThickness = DOUBLE_THICKNESS_EDGE / 2;
             if (skeleton.ClippedEdges.HasFlag(FrameEdges.Left))
@@ -191,16 +193,17 @@ namespace KinectToBVH
         /// <param name="skeleton"></param>
         /// <param name="joint1"></param>
         /// <param name="joint2"></param>
-        private void addBone(Skeleton skeleton, JointType joint1, JointType joint2)
+        private void addBone(Body skeleton, JointType joint1, JointType joint2)
         {
-            if (JointTrackingState.Tracked == skeleton.Joints[joint1].TrackingState
-                && JointTrackingState.Tracked == skeleton.Joints[joint2].TrackingState)
+            if (TrackingState.Tracked == skeleton.Joints[joint1].TrackingState
+                && TrackingState.Tracked == skeleton.Joints[joint2].TrackingState)
             {
-                DepthImagePoint depthPoint1 = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeleton.Joints[joint1].Position,
-                    DepthImageFormat.Resolution640x480Fps30);
-                DepthImagePoint depthPoint2 = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeleton.Joints[joint2].Position,
-                    DepthImageFormat.Resolution640x480Fps30);
-                addLineToWindow(depthPoint1.X, depthPoint1.Y, depthPoint2.X, depthPoint2.Y,
+                DepthSpacePoint[] temp = new DepthSpacePoint[2];
+                
+                CameraSpacePoint[] points = { skeleton.Joints[joint1].Position, skeleton.Joints[joint2].Position };
+               this.sensor.CoordinateMapper.MapCameraPointsToDepthSpace(points,
+                    temp);
+                addLineToWindow(temp[0].X, temp[0].Y, temp[1].X, temp[1].Y,
                     BRUSH_BONE, DOUBLE_THICKNESS_BONE);
             }
         }
@@ -239,26 +242,31 @@ namespace KinectToBVH
         /// Add all bones to screen
         /// </summary>
         /// <param name="skeleton"></param>
-        private void addBones(Skeleton skeleton)
+        private void addBones(Body skeleton)
         {
             // add torso
-            addBone(skeleton, JointType.HipCenter, JointType.HipLeft);
-            addBone(skeleton, JointType.HipCenter, JointType.HipRight);
-            addBone(skeleton, JointType.HipCenter, JointType.Spine);
-            addBone(skeleton, JointType.Spine, JointType.ShoulderCenter);
-            addBone(skeleton, JointType.ShoulderCenter, JointType.Head);
-            addBone(skeleton, JointType.ShoulderCenter, JointType.ShoulderLeft);
-            addBone(skeleton, JointType.ShoulderCenter, JointType.ShoulderRight);
+            addBone(skeleton, JointType.SpineBase, JointType.HipLeft);
+            addBone(skeleton, JointType.SpineBase, JointType.HipRight);
+            addBone(skeleton, JointType.SpineBase, JointType.SpineMid);
+            addBone(skeleton, JointType.SpineMid, JointType.SpineShoulder);
+            addBone(skeleton, JointType.SpineShoulder, JointType.Neck);
+            addBone(skeleton, JointType.SpineShoulder, JointType.ShoulderLeft);
+            addBone(skeleton, JointType.SpineShoulder, JointType.ShoulderRight);
+            addBone(skeleton, JointType.Neck, JointType.Head);
 
             // add left arm
             addBone(skeleton, JointType.ShoulderLeft, JointType.ElbowLeft);
             addBone(skeleton, JointType.ElbowLeft, JointType.WristLeft);
             addBone(skeleton, JointType.WristLeft, JointType.HandLeft);
+            addBone(skeleton, JointType.WristLeft, JointType.ThumbLeft);
+            addBone(skeleton, JointType.HandLeft, JointType.HandTipLeft);
 
             // add right arm
             addBone(skeleton, JointType.ShoulderRight, JointType.ElbowRight);
             addBone(skeleton, JointType.ElbowRight, JointType.WristRight);
             addBone(skeleton, JointType.WristRight, JointType.HandRight);
+            addBone(skeleton, JointType.WristRight, JointType.ThumbRight);
+            addBone(skeleton, JointType.HandRight, JointType.HandTipRight);
 
             // add left leg
             addBone(skeleton, JointType.HipLeft, JointType.KneeLeft);
@@ -273,7 +281,7 @@ namespace KinectToBVH
 
         private void addBVHBones_Debug()
         {
-            updateDebugBone(_kinectSkeleton.HipCenter);
+            updateDebugBone(_kinectSkeleton.m_spineBase);
             foreach (JointNode node in _kinectSkeleton.JointNodes.Values)
             {
                 if (node.Parent == null) continue;
@@ -314,6 +322,20 @@ namespace KinectToBVH
                 updateDebugBone(child);
             }
         }
-        
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            if (null != this.sensor)
+            {
+                this.sensor.Close();
+            }
+
+            bvhWriter.OutputBVHToFile();
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            underRecording = true;
+        }
     }
 }

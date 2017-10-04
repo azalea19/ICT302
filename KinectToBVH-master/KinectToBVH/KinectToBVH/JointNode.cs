@@ -17,9 +17,10 @@ namespace KinectToBVH
         // offset based on parent node
         public Point3D OriginalOffset;  // standard pose
         public Point3D Offset = new Point3D(0, 0, 0);
+
         // rotation relation to parent node
         public Vector3D Rotation = new Vector3D(0, 0, 0);
-        
+        public Vector3D AbsoluteRotation = new Vector3D(0, 0, 0);
         // orientation of joint tranformation
         public Axis BaseAxis;
 

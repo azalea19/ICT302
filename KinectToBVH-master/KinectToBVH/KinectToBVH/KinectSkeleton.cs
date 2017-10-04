@@ -13,12 +13,12 @@ namespace KinectToBVH
     public class KinectSkeleton
     {
         // tracking node number of Kinect
-        public const int INT_JOINTCOUNT = 20;
+        public const int INT_JOINTCOUNT = 25;
 
         public const int INT_KINECTFRAMERATE = 30;
 
         // root joint node
-        public JointNode HipCenter;
+        public JointNode m_spineBase;
 
         // store all joint nodes into an array, for the sake of easier access
         public Dictionary<string, JointNode> JointNodes;
@@ -34,7 +34,7 @@ namespace KinectToBVH
 
         // all bones' lengthes - end joint as the key
         private Dictionary<JointType, Double> _boneLengths = new Dictionary<JointType, Double>();
-        
+
         // track whether all bone original offsets are initialized
         private int _cliberateNum = 0;
 
@@ -58,9 +58,9 @@ namespace KinectToBVH
         /// todo: give each bone a rotation as its start position, and calculate the original offset using this rotation and bone length;
         /// </summary>
         /// <param name="skeleton"></param>
-        public void CliberateSkeleton(Skeleton skeleton)
+        public void CliberateSkeleton(Body skeleton)
         {
-            _cliberateNum++; 
+            _cliberateNum++;
             if (NeedBoneClibrated())
             {
                 initializeJoints(skeleton);
@@ -104,39 +104,40 @@ namespace KinectToBVH
         /// update all nodes' offsets and rotations with the latest skeleton frame
         /// </summary>
         /// <param name="skeleton"></param>
-        public void UpdateJoints(Skeleton skeleton)
+        public void UpdateJoints(Body skeleton)
         {
             foreach (JointNode node in JointNodes.Values)
             {
                 if (NodeTypeEnum.END != node.Type)
                 {
                     JointType rotationJoint = getRotationJoint(node);
-                    Vector3D rotation;
+                    Vector3D rotation = new Vector3D();
                     Quaternion rotationQuat;
                     // root joint
                     if (node.Type == NodeTypeEnum.ROOT)
                     {
                         // offset
-                        Point3D skeletonOffset = new Point3D(skeleton.Position.X, skeleton.Position.Y, skeleton.Position.Z);
+
+                        Point3D skeletonOffset = new Point3D(skeleton.Joints[JointType.SpineBase].Position.X, skeleton.Joints[JointType.SpineBase].Position.Y, skeleton.Joints[JointType.SpineBase].Position.Z);
                         BVHFile.BVHScalePoint(ref skeletonOffset);
                         node.Offset = new Point3D(skeletonOffset.X - _initialOffsets[node.Name].X,
                             skeletonOffset.Y - _initialOffsets[node.Name].Y + calRealHeightOfHipJoint(),
-                            -(skeletonOffset.Z - _initialOffsets[node.Name].Z));                        
+                            -(skeletonOffset.Z - _initialOffsets[node.Name].Z));
 
                         // rotation
-                        rotationQuat = MathHelper.Vector4ToQuaternion(skeleton.BoneOrientations[rotationJoint].AbsoluteRotation.Quaternion);
+                        rotationQuat = MathHelper.Vector4ToQuaternion(skeleton.JointOrientations[rotationJoint].Orientation);
                         rotation = MathHelper.QuaternionToAxisAngles(rotationQuat);
                         rotation.X = 0;
                         rotation.Y *= -1;
                         rotation.Z = 0;
                     }
                     else  // all other joints
-                    {   // bones need no rotation
-                        if (!(node.Name == "Spine" || node.Name == "Head"
+                    {
+                        // bones need no rotation
+                        if (!(node.Name == "SpineMid" || node.Name == "Neck"
                             || node.Name == "CollarLeft" || node.Name == "CollarRight" || node.Name == "AnkleLeft" || node.Name == "AnkleRight"))
                         {
-                            if (node.Name == "HipCenter2"
-                                || node.Name == "ShoulderLeft" || node.Name == "ShoulderRight"
+                            if (node.Name == "SpineBase2" || node.Name == "ShoulderLeft" || node.Name == "ShoulderRight"
                                 || node.Name == "HipLeft" || node.Name == "HipRight")
                             {
                                 Vector3D offset = new Vector3D();
@@ -156,10 +157,10 @@ namespace KinectToBVH
                                     case "ShoulderRight":
                                         axis = new Vector3D(1, 0, 0);
                                         break;
-                                    case "HipCenter2":
+                                    case "SpineBase2":
                                         axis = new Vector3D(0, 1, 0);
-                                        rotationJoint = JointType.ShoulderCenter;
-                                        parentJoint = JointType.Spine;
+                                        rotationJoint = JointType.SpineShoulder;
+                                        parentJoint = JointType.SpineMid;
                                         break;
                                     default:
                                         axis = new Vector3D();
@@ -176,7 +177,7 @@ namespace KinectToBVH
                                 if (node.Name == "ShoulderLeft" || node.Name == "ShoulderRight")
                                 {
                                     Vector3D rotationOffset = MathHelper.QuaternionToAxisAngles(
-                                        MathHelper.Vector4ToQuaternion(skeleton.BoneOrientations[JointType.ShoulderCenter].AbsoluteRotation.Quaternion));
+                                        MathHelper.Vector4ToQuaternion(skeleton.JointOrientations[JointType.SpineShoulder].Orientation));
                                     Matrix3D rotationMatrix = MathHelper.GetRotationMatrix(-rotationOffset.X * Math.PI / 180 - 180, 0, 0);
                                     rotation = Vector3D.Multiply(offset, rotationMatrix);
                                     rotationQuat = MathHelper.GetQuaternion(axis, rotation);
@@ -186,7 +187,7 @@ namespace KinectToBVH
                                 else if (node.Name == "HipLeft" || node.Name == "HipRight")
                                 {
                                     Vector3D rotationOffset = MathHelper.QuaternionToAxisAngles(
-                                        MathHelper.Vector4ToQuaternion(skeleton.BoneOrientations[JointType.HipCenter].AbsoluteRotation.Quaternion));
+                                        MathHelper.Vector4ToQuaternion(skeleton.JointOrientations[JointType.SpineBase].Orientation));
                                     rotation = Vector3D.Multiply(offset, MathHelper.GetRotationMatrixY(-rotationOffset.Y * Math.PI / 180));
                                     rotationQuat = MathHelper.GetQuaternion(axis, rotation);
                                     rotation = MathHelper.QuaternionToAxisAngles(rotationQuat);
@@ -197,7 +198,7 @@ namespace KinectToBVH
                                 else
                                 {
                                     Vector3D rotationOffset = MathHelper.QuaternionToAxisAngles(
-                                        MathHelper.Vector4ToQuaternion(skeleton.BoneOrientations[JointType.HipCenter].AbsoluteRotation.Quaternion));
+                                        MathHelper.Vector4ToQuaternion(skeleton.JointOrientations[JointType.SpineBase].Orientation));
                                     rotation = Vector3D.Multiply(offset, MathHelper.GetRotationMatrixY(-rotationOffset.Y * Math.PI / 180));
                                     rotationQuat = MathHelper.GetQuaternion(axis, rotation);
                                     rotation = MathHelper.QuaternionToAxisAngles(rotationQuat);
@@ -208,9 +209,13 @@ namespace KinectToBVH
                             }
                             else
                             {
-                                rotationQuat = MathHelper.Vector4ToQuaternion(skeleton.BoneOrientations[rotationJoint].HierarchicalRotation.Quaternion);
-                                rotation = MathHelper.QuaternionToAxisAngles(rotationQuat);
 
+                                // rotationQuat = MathHelper.Vector4ToQuaternion(node.Parent..Rotation);//skeleton.JointOrientations[rotationJoint].Orientation);
+                                // rotation = MathHelper.QuaternionToAxisAngles(rotationQuat);
+                                if (_clibrationAngles.ContainsKey(node.Name))
+                                    rotation = node.Parent.Rotation - _clibrationAngles[node.Parent.Name];
+                                else
+                                    rotation = node.Parent.Rotation;
                                 if (node.BaseAxis == Axis.nY)
                                 {
                                     rotation.X *= -1;
@@ -245,7 +250,7 @@ namespace KinectToBVH
                         node.Rotation = rotation + _clibrationAngles[node.Name];
                     else
                         node.Rotation = rotation;
-                }                
+                }
             }
         }
 
@@ -257,25 +262,25 @@ namespace KinectToBVH
             JointNodes = new Dictionary<string, JointNode>();
 
             // root
-            HipCenter = new JointNode(JointType.HipCenter.ToString(), JointType.HipCenter, null, Axis.None, NodeTypeEnum.ROOT, true);
-            JointNodes.Add(HipCenter.Name, HipCenter);
+            m_spineBase = new JointNode(JointType.SpineBase.ToString(), JointType.SpineBase, null, Axis.None, NodeTypeEnum.ROOT, true);
+            JointNodes.Add(m_spineBase.Name, m_spineBase);
 
             // hip, spine, shouderCenter, neck, head
-            JointNode hipCenter2 = new JointNode("HipCenter2", JointType.HipCenter, HipCenter, Axis.Y, NodeTypeEnum.JOINT, false);
-            JointNodes.Add(hipCenter2.Name, hipCenter2);
-            JointNode spine = new JointNode(JointType.Spine, hipCenter2, Axis.Y);
-            JointNodes.Add(spine.Name, spine);
-            JointNode shoulderCenter = new JointNode(JointType.ShoulderCenter, spine, Axis.Y);
-            JointNodes.Add(shoulderCenter.Name, shoulderCenter);
-            JointNode neck = new JointNode("Neck", JointType.Head, shoulderCenter, Axis.Y, NodeTypeEnum.JOINT, false);
+            JointNode spineBase2 = new JointNode("SpineBase2", JointType.SpineBase, m_spineBase, Axis.Y, NodeTypeEnum.JOINT, false);
+            JointNodes.Add(spineBase2.Name, spineBase2);
+            JointNode spineMid = new JointNode(JointType.SpineMid, spineBase2, Axis.Y,true);
+            JointNodes.Add(spineMid.Name, spineMid);
+            JointNode spineShoulder = new JointNode(JointType.SpineShoulder, spineMid, Axis.Y,true);
+            JointNodes.Add(spineShoulder.Name, spineShoulder);
+            JointNode neck = new JointNode("Neck", JointType.Neck, spineShoulder, Axis.Y, NodeTypeEnum.JOINT, false);
             JointNodes.Add(neck.Name, neck);
-            JointNode head = new JointNode(JointType.Head, neck, Axis.Y);
+            JointNode head = new JointNode(JointType.Head, neck, Axis.Y,true);
             JointNodes.Add(head.Name, head);
             JointNode headEnd = new JointNode("HeadEnd", JointType.Head, head, Axis.None, NodeTypeEnum.END, false);
             JointNodes.Add(headEnd.Name, headEnd);
 
             // left arm
-            JointNode collarLeft = new JointNode("CollarLeft", JointType.ShoulderLeft, shoulderCenter, Axis.X, NodeTypeEnum.JOINT, false);
+            JointNode collarLeft = new JointNode("CollarLeft", JointType.ShoulderLeft, spineShoulder, Axis.X, NodeTypeEnum.JOINT, false);
             JointNodes.Add(collarLeft.Name, collarLeft);
             JointNode shoulderLeft = new JointNode(JointType.ShoulderLeft, collarLeft, Axis.X);
             JointNodes.Add(shoulderLeft.Name, shoulderLeft);
@@ -283,11 +288,15 @@ namespace KinectToBVH
             JointNodes.Add(elbowLeft.Name, elbowLeft);
             JointNode wristLeft = new JointNode(JointType.WristLeft, elbowLeft, Axis.X);
             JointNodes.Add(wristLeft.Name, wristLeft);
-            JointNode handLeft = new JointNode(JointType.HandLeft.ToString(), JointType.HandLeft, wristLeft, Axis.X, NodeTypeEnum.END, true);
+            JointNode handLeft = new JointNode(JointType.HandLeft.ToString(), JointType.HandLeft, wristLeft, Axis.X, NodeTypeEnum.JOINT, true);
             JointNodes.Add(handLeft.Name, handLeft);
+            JointNode thumbLeft = new JointNode(JointType.ThumbLeft.ToString(), JointType.ThumbLeft, wristLeft, Axis.X, NodeTypeEnum.END, true);
+            JointNodes.Add(thumbLeft.Name, thumbLeft);
+            JointNode handTipLeft = new JointNode(JointType.HandTipLeft.ToString(), JointType.HandTipLeft, handLeft, Axis.X, NodeTypeEnum.END, true);
+            JointNodes.Add(handTipLeft.Name, handTipLeft);
 
             // right arm
-            JointNode collarRight = new JointNode("CollarRight", JointType.ShoulderRight, shoulderCenter, Axis.nX, NodeTypeEnum.JOINT, false);
+            JointNode collarRight = new JointNode("CollarRight", JointType.ShoulderRight, spineShoulder, Axis.nX, NodeTypeEnum.JOINT, false);
             JointNodes.Add(collarRight.Name, collarRight);
             JointNode shoulderRight = new JointNode(JointType.ShoulderRight, collarRight, Axis.nX);
             JointNodes.Add(shoulderRight.Name, shoulderRight);
@@ -295,11 +304,15 @@ namespace KinectToBVH
             JointNodes.Add(elbowRight.Name, elbowRight);
             JointNode wristRight = new JointNode(JointType.WristRight, elbowRight, Axis.nX);
             JointNodes.Add(wristRight.Name, wristRight);
-            JointNode handRight = new JointNode(JointType.HandRight.ToString(), JointType.HandRight, wristRight, Axis.nX, NodeTypeEnum.END, true);
+            JointNode handRight = new JointNode(JointType.HandRight.ToString(), JointType.HandRight, wristRight, Axis.nX, NodeTypeEnum.JOINT, true);
             JointNodes.Add(handRight.Name, handRight);
+            JointNode thumbRight = new JointNode(JointType.ThumbRight.ToString(), JointType.ThumbRight, wristRight, Axis.nX, NodeTypeEnum.END, true);
+            JointNodes.Add(thumbRight.Name, thumbRight);
+            JointNode handTipRight = new JointNode(JointType.HandTipRight.ToString(), JointType.HandTipRight, handRight, Axis.nX, NodeTypeEnum.END, true);
+            JointNodes.Add(handTipRight.Name, handTipRight);
 
             // left lower part
-            JointNode hipLeft = new JointNode(JointType.HipLeft, HipCenter, Axis.X);
+            JointNode hipLeft = new JointNode(JointType.HipLeft, m_spineBase, Axis.X);
             JointNodes.Add(hipLeft.Name, hipLeft);
             JointNode KneeLeft = new JointNode(JointType.KneeLeft, hipLeft, Axis.nY);
             JointNodes.Add(KneeLeft.Name, KneeLeft);
@@ -309,7 +322,7 @@ namespace KinectToBVH
             JointNodes.Add(footLeft.Name, footLeft);
 
             // right lower part
-            JointNode hipRight = new JointNode(JointType.HipRight, HipCenter, Axis.nX);
+            JointNode hipRight = new JointNode(JointType.HipRight, m_spineBase, Axis.nX);
             JointNodes.Add(hipRight.Name, hipRight);
             JointNode kneeRight = new JointNode(JointType.KneeRight, hipRight, Axis.nY);
             JointNodes.Add(kneeRight.Name, kneeRight);
@@ -325,9 +338,11 @@ namespace KinectToBVH
         private void initializeClibrateAngles()
         {
             _clibrationAngles = new Dictionary<string, Vector3D>();
-            _clibrationAngles.Add("HipCenter2", new Vector3D(-30, 0, 0));
-            _clibrationAngles.Add(JointType.Spine.ToString(), new Vector3D(30, 0, 0));
-            _clibrationAngles.Add("Neck", new Vector3D(-20, 0, 0));
+            _clibrationAngles.Add("SpineBase2", new Vector3D(-10, 0, 0));
+            _clibrationAngles.Add(JointType.SpineMid.ToString(), new Vector3D(10, 0, 0));
+            //_clibrationAngles.Add(JointType.SpineShoulder.ToString(), new Vector3D(30, 0, 0));
+
+            _clibrationAngles.Add(JointType.Neck.ToString(), new Vector3D(-20, 0, 0));
             _clibrationAngles.Add(JointType.ShoulderLeft.ToString(), new Vector3D(30, 0, 0));
             _clibrationAngles.Add(JointType.ShoulderRight.ToString(), new Vector3D(30, 0, 0));
             _clibrationAngles.Add(JointType.HipLeft.ToString(), new Vector3D(-10, 0, 0));
@@ -340,7 +355,7 @@ namespace KinectToBVH
         /// usning multi-time average to calculate bone length
         /// </summary>
         /// <param name="skeleton"></param>
-        private void initializeJoints(Skeleton skeleton)
+        private void initializeJoints(Body skeleton)
         {
             Point3D nodeOffset;
             foreach (JointNode node in JointNodes.Values)
@@ -364,14 +379,14 @@ namespace KinectToBVH
         }
 
         // get one joint's offset in kinect skeleton frame
-        private Point3D getNodeOffset(JointNode node, Skeleton skeleton)
+        private Point3D getNodeOffset(JointNode node, Body skeleton)
         {
             if (!node.IsKinectJoint)
                 return new Point3D();
 
             Point3D offset;
             if (node.Type == NodeTypeEnum.ROOT)
-                offset = new Point3D(skeleton.Position.X, skeleton.Position.Y, skeleton.Position.Z);
+                offset = new Point3D(skeleton.Joints[JointType.SpineBase].Position.X, skeleton.Joints[JointType.SpineBase].Position.Y, skeleton.Joints[JointType.SpineBase].Position.Z);
             else
             {
                 JointNode parent = node.Parent;
@@ -423,7 +438,7 @@ namespace KinectToBVH
             return Math.Max(Math.Max(Math.Abs(point.X),
                         Math.Abs(point.Y)), Math.Abs(point.Z));
         }
-        
+
         /// <summary>
         /// one joint's rotation is actually stored in its parent joint, so for a given joint, we should get its child joint's rotation
         /// </summary>
@@ -439,12 +454,16 @@ namespace KinectToBVH
                     return JointType.WristLeft;
                 case "WristLeft":
                     return JointType.HandLeft;
+                case "HandLeft":
+                    return JointType.HandTipLeft;
                 case "ShoulderRight":
                     return JointType.ElbowRight;
                 case "ElbowRight":
                     return JointType.WristRight;
                 case "WristRight":
                     return JointType.HandRight;
+                case "HandRight":
+                    return JointType.HandTipRight;
                 case "HipLeft":
                     return JointType.KneeLeft;
                 case "KneeLeft":
@@ -457,15 +476,19 @@ namespace KinectToBVH
                     return JointType.AnkleRight;
                 case "AnkleRight":
                     return JointType.FootRight;
+                case "Neck":
+                    return JointType.Head;
+                //case "SpineShoulder":
+                //    return JointType.SpineMid;
                 default:
-                //case "HipCenter":
-                //case "HipCenter2":
-                //case "Spine":
-                //case "ShoulderCenter":
-                //case "Neck":
-                //case "Head":
-                //case "CollarLeft":
-                //case "CollarRight":
+                    //case "HipCenter":
+                    //case "HipCenter2":
+                    //case "Spine":
+                    //case "ShoulderCenter":
+                    //case "Neck":
+                    //case "Head":
+                    //case "CollarLeft":
+                    //case "CollarRight":
                     return node.JointIndex;
             }
         }
@@ -493,13 +516,14 @@ namespace KinectToBVH
         /// calcualte the average
         /// </summary>
         /// <param name="skeleton"></param>
-        private void updateBoneLengths(Skeleton skeleton)
+        private void updateBoneLengths(Body skeleton)
         {
             // hip to spine
-            calCenterBoneLength(skeleton, JointNodes[JointType.Spine.ToString()]);
+            calCenterBoneLength(skeleton, JointNodes[JointType.SpineMid.ToString()]);
             // spine to shoulder
-            calCenterBoneLength(skeleton, JointNodes[JointType.ShoulderCenter.ToString()]);
-            // shoulder to head
+            calCenterBoneLength(skeleton, JointNodes[JointType.SpineShoulder.ToString()]);
+
+            // neck to head
             calCenterBoneLength(skeleton, JointNodes[JointType.Head.ToString()]);
             // shoulder to up arm
             calSideBoneLength(skeleton, JointNodes[JointType.ShoulderLeft.ToString()]);
@@ -517,6 +541,14 @@ namespace KinectToBVH
             calSideBoneLength(skeleton, JointNodes[JointType.AnkleLeft.ToString()]);
             // ankle to foot 
             calSideBoneLength(skeleton, JointNodes[JointType.FootLeft.ToString()]);
+
+
+            // shoulder to neck
+            calCenterBoneLength(skeleton, JointNodes[JointType.Neck.ToString()]);
+            // elbow to thumb
+            calSideBoneLength(skeleton, JointNodes[JointType.ThumbLeft.ToString()]);
+            // hand to tip
+            calSideBoneLength(skeleton, JointNodes[JointType.HandTipLeft.ToString()]);
         }
 
         /// <summary>
@@ -526,7 +558,7 @@ namespace KinectToBVH
         /// <param name="bone"></param>
         /// <param name="startJoint"></param>
         /// <param name="endJoint"></param>
-        private void calCenterBoneLength(Skeleton skeleton, JointNode node)
+        private void calCenterBoneLength(Body skeleton, JointNode node)
         {
             double length = BVHFile.BVHScaledValue(calDescartesLength(skeleton.Joints[node.Parent.JointIndex].Position,
                 skeleton.Joints[node.JointIndex].Position));
@@ -547,7 +579,7 @@ namespace KinectToBVH
         /// <param name="bone"></param>
         /// <param name="startJoint"></param>
         /// <param name="endJoint"></param>
-        private void calSideBoneLength(Skeleton skeleton, JointNode node)
+        private void calSideBoneLength(Body skeleton, JointNode node)
         {
             double leftLength = BVHFile.BVHScaledValue(calDescartesLength(skeleton.Joints[node.Parent.JointIndex].Position,
                 skeleton.Joints[node.JointIndex].Position));
@@ -589,6 +621,10 @@ namespace KinectToBVH
                     return JointType.WristRight;
                 case JointType.HandLeft:
                     return JointType.HandRight;
+                case JointType.HandTipLeft:
+                    return JointType.HandTipRight;
+                case JointType.ThumbLeft:
+                    return JointType.ThumbRight;
 
                 case JointType.HipRight:
                     return JointType.HipLeft;
@@ -606,6 +642,10 @@ namespace KinectToBVH
                     return JointType.WristLeft;
                 case JointType.HandRight:
                     return JointType.HandLeft;
+                case JointType.ThumbRight:
+                    return JointType.ThumbLeft;
+                case JointType.HandTipRight:
+                    return JointType.HandTipLeft;
 
                 default:
                     return joint;
@@ -618,7 +658,7 @@ namespace KinectToBVH
         /// <param name="point1"></param>
         /// <param name="point2"></param>
         /// <returns></returns>
-        private double calDescartesLength(SkeletonPoint point1, SkeletonPoint point2)
+        private double calDescartesLength(CameraSpacePoint point1, CameraSpacePoint point2)
         {
             return Math.Sqrt(Math.Pow(point2.X - point1.X, 2)
                 + Math.Pow(point2.Y - point1.Y, 2)

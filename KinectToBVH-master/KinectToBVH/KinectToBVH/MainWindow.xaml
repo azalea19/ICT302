@@ -5,5 +5,7 @@
     <Grid Name ="grid" Background="Black">
         <Canvas Name="canvas" Width="640" Height="700" VerticalAlignment="Center" Background="Black">
         </Canvas>
+        <Button x:Name="button" Content="Save" HorizontalAlignment="Left" Margin="856,218,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
+        <Button x:Name="button1" Content="Record" HorizontalAlignment="Left" Margin="856,120,0,0" VerticalAlignment="Top" Width="75" Click="button1_Click"/>
     </Grid>
 </Window>
