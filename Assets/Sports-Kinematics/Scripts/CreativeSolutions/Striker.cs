@@ -9,7 +9,7 @@ namespace SportsKinematics
 
         public GameObject m_tableTennisBat;
         public GameObject m_catch;
-        public GameObject m_simManager;
+        //public GameObject m_simManager;
 
         protected GameObject m_currentStriker;
 
