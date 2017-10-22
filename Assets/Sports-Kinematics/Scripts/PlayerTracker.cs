@@ -116,7 +116,7 @@ namespace SportsKinematics
             m_wall.GetComponent<BoxCollider>().isTrigger = true;
 
             m_wall.AddComponent<BallPassPlayer>();
-            m_wall.GetComponent<BallPassPlayer>().SpineShoulder = bodyJoint.parent.FindChild((JointType.SpineShoulder).ToString()).gameObject;
+            m_wall.GetComponent<BallPassPlayer>().SpineShoulder = bodyJoint.parent.Find((JointType.SpineShoulder).ToString()).gameObject;
 
             m_wall.transform.position = bodyJoint.position;
             m_wall.transform.localScale = new Vector3(100, 100, 1);
@@ -129,7 +129,7 @@ namespace SportsKinematics
         /// <param name="bodyJoint">Transform of the joint to attach the wall to.</param>
         private void UpdateCollisionPlane(Transform bodyJoint)
         {
-            m_wall.GetComponent<BallPassPlayer>().SpineShoulder = bodyJoint.parent.FindChild((JointType.SpineShoulder).ToString()).gameObject;
+            m_wall.GetComponent<BallPassPlayer>().SpineShoulder = bodyJoint.parent.Find((JointType.SpineShoulder).ToString()).gameObject;
             m_wall.transform.position = bodyJoint.position;
         }
 
@@ -147,17 +147,17 @@ namespace SportsKinematics
                 {
                     //m_striker.GetComponent<StrikerRenderer>().CreateStriker(trackedBody.transform.FindChild("HandRight"), true);
                     if (!m_wall)
-                        CreateCollisionPlane(trackedBody.transform.FindChild("HandRight"));
+                        CreateCollisionPlane(trackedBody.transform.Find("HandRight"));
                     else
-                        UpdateCollisionPlane(trackedBody.transform.FindChild("HandRight"));
+                        UpdateCollisionPlane(trackedBody.transform.Find("HandRight"));
                 }
                 else
                 {
                     //m_striker.GetComponent<StrikerRenderer>().CreateStriker(trackedBody.transform.FindChild("HandLeft"), true);
                     if (!m_wall)
-                        CreateCollisionPlane(trackedBody.transform.FindChild("HandLeft"));
+                        CreateCollisionPlane(trackedBody.transform.Find("HandLeft"));
                     else
-                        UpdateCollisionPlane(trackedBody.transform.FindChild("HandLeft"));
+                        UpdateCollisionPlane(trackedBody.transform.Find("HandLeft"));
                 }
             }
         }

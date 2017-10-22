@@ -91,12 +91,12 @@ public class VRmovement : MonoBehaviour
                 float[] o = new float[3];
 
 
-                Vector3 pos = trackedBody.transform.FindChild(((Kinect.JointType)i).ToString()).transform.position;
+                Vector3 pos = trackedBody.transform.Find(((Kinect.JointType)i).ToString()).transform.position;
                 p[0] = pos.x;
                 p[1] = pos.y;
                 p[2] = pos.z;
 
-                Quaternion ori = trackedBody.transform.FindChild(((Kinect.JointType)i).ToString()).transform.rotation;
+                Quaternion ori = trackedBody.transform.Find(((Kinect.JointType)i).ToString()).transform.rotation;
                 o[0] = pos.x;
                 o[1] = pos.y;
                 o[2] = pos.z;
@@ -108,17 +108,17 @@ public class VRmovement : MonoBehaviour
             for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
             {
                 if(!jt.ToString().Equals("Neck"))
-                    m_actionRenderer.RefreshBodyLines(trackedBody, postions, trackedBody.transform.FindChild(jt.ToString()).transform, jt);
+                    m_actionRenderer.RefreshBodyLines(trackedBody, postions, trackedBody.transform.Find(jt.ToString()).transform, jt);
 
-                trackedBody.transform.FindChild(jt.ToString()).transform.rotation = new Quaternion(orientation[jt][0], orientation[jt][1], orientation[jt][2], 1);
+                trackedBody.transform.Find(jt.ToString()).transform.rotation = new Quaternion(orientation[jt][0], orientation[jt][1], orientation[jt][2], 1);
 
-                if(trackedBody.transform.FindChild("Head").gameObject)
-                    trackedBody.transform.FindChild("Head").gameObject.layer = LayerMask.NameToLayer("Occluded");
+                if(trackedBody.transform.Find("Head").gameObject)
+                    trackedBody.transform.Find("Head").gameObject.layer = LayerMask.NameToLayer("Occluded");
 
                 //trackedBody.transform.FindChild("Neck").gameObject.layer = LayerMask.NameToLayer("Occluded");
             }
 
-            trackedBody.transform.position = transform.position - trackedBody.transform.FindChild("Neck").localPosition;
+            trackedBody.transform.position = transform.position - trackedBody.transform.Find("Neck").localPosition;
         }
     }
 }

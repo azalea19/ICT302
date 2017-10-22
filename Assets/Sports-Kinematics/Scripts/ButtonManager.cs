@@ -4,6 +4,10 @@ using UnityEngine.UI;
 using System;
 using System.IO;
 using System.Threading;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SportsKinematics.UI
 {
@@ -76,7 +80,7 @@ namespace SportsKinematics.UI
             m_Popup = Instantiate(popup) as GameObject;
             Button b = GetComponent<Button>();
 
-            m_Popup.transform.FindChild("Popup").GetComponent<Popup>().CallingButton = b;
+            m_Popup.transform.Find("Popup").GetComponent<Popup>().CallingButton = b;
         }
 
         /// <summary>
@@ -92,7 +96,7 @@ namespace SportsKinematics.UI
             m_Popup = Instantiate(popup) as GameObject;
             Button b = GetComponent<Button>();
 
-            m_Popup.transform.FindChild("Popup").GetComponent<Popup>().CallingButton = b;
+            m_Popup.transform.Find("Popup").GetComponent<Popup>().CallingButton = b;
         }
 
         /// <summary>
@@ -282,6 +286,19 @@ namespace SportsKinematics.UI
             }
         }
 
+        private string GeneratePassword()
+        {
+            string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            string new_password = "";
+
+            for(int i=0;i<8;i++)
+            {
+                new_password += chars[UnityEngine.Random.Range(0, chars.Length)];
+            }
+
+            return new_password;
+        }
+
         /// <summary>
         /// Creates all missing subdirectories
         /// </summary>
@@ -339,8 +356,9 @@ namespace SportsKinematics.UI
 
             if (userValid && passValid && emailValid)
             {
-                if (!(File.Exists(path + "/../Users/" + user + "/" + user + ".shri")))
-                {
+                //if (!(File.Exists(path + "/../Users/" + user + "/" + user + ".shri")))
+                if (!Database.UserExist(user))
+                    {
                     t_folders = new Thread(() => CreateSubDirectories(path, user));
                     if (!t_folders.IsAlive)
                         t_folders.Start();
@@ -353,7 +371,7 @@ namespace SportsKinematics.UI
                 }
                 else
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User already exists!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User already exists!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -362,20 +380,20 @@ namespace SportsKinematics.UI
             {
                 if (!userValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                     CreatePopup(Popup);
                     return;
                 }
 
                 if (!passValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
                     CreatePopup(Popup);
                     return;
                 }
                 if (!emailValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Email is empty or invalid!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Email is empty or invalid!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -404,14 +422,16 @@ namespace SportsKinematics.UI
 
             bool userValid = Valid(username);
             bool passValid = Valid(pass);
-
+            
             if (userValid && passValid)
             {
-                if (File.Exists(fn))
+                //if (File.Exists(fn))
+                if(Database.UserExist(username))
                 {
-                    User user = GameObject.Find("UserManager").GetComponent<UserManager>().Load(username);
-
-                    if (Match(pass, user.Password))
+                    //User user = GameObject.Find("UserManager").GetComponent<UserManager>().Load(username);
+                    User user = Database.SelectUser(username);
+                    
+                    if (Match(pass.GetHashCode().ToString(), user.Password))
                     {
                         t_folders = new Thread(() => CreateSubDirectories(path, username));
                         if (!t_folders.IsAlive)
@@ -435,14 +455,14 @@ namespace SportsKinematics.UI
                     else
                         if(!Match(pass, user.Password))
                         {
-                            Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
+                            Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
                             CreatePopup(Popup);
                             passInp.text = "";
                         }
                 }
                 else
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User does not exist!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! User does not exist!";
                     CreatePopup(Popup);
                     userInp.text = "";
                     passInp.text = "";
@@ -452,13 +472,13 @@ namespace SportsKinematics.UI
             {
                 if (!userValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                     CreatePopup(Popup);
                     return;
                 }
                 if (!passValid)
                 {
-                    Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password is empty!";
                     CreatePopup(Popup);
                     return;
                 }
@@ -484,57 +504,80 @@ namespace SportsKinematics.UI
         {
             m_canvas = "Login/LostPasswordCanvas/";
 
-            string user = GameObject.Find(m_canvas + "EmailField").GetComponent<InputField>().text.ToLower();
+            MailMessage mail = new MailMessage();
+
+            string u_newPassword = GeneratePassword();
+
+            string user = GameObject.Find(m_canvas + "Email address/EmailField").GetComponent<InputField>().text.ToLower();
+            print("User: " + user + " New password: " + u_newPassword);
 
             bool valid = Valid(user);
 
             if (!valid)
             {
-                Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
+                Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Username is empty!";
                 CreatePopup(Popup);
                 return;
             }
 
             if (!Connectivity.CheckConnection())
             {
-                Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Internet connection is needed!";
+                Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Internet connection is needed!";
                 CreatePopup(Popup);
                 return;
             }
 
-            string fn = Application.dataPath + "/../Users/" + user + "/" + user + ".shri";
-            string recipient = user;
-            string senderEmail = "sports.kinematics.murdoch@gmail.com";
-            string pass = "Krs2017!";
-            string senderName = "[NO REPLY] Kinematic Research Solutions";
-            string host = "smtp.gmail.com";
-            string subject = "Automated Email - Forgotten Password";
+            //string fn = Application.dataPath + "/../Users/" + user + "/" + user + ".shri";
+            //string recipient = user;
+            //string senderEmail = "creative.solutions.murdoch@outlook.com";//sports.kinematics.murdoch@gmail.com";
+            //string pass = "kinetic2017S2";
+            //string senderName = "[NO REPLY] Kinematic Research Solutions";
+            //string host = "smtp.live.com";//"smtp.gmail.com";
+            //string subject = "Automated Email - Forgotten Password";
+            //
+            //string body = "A Point Light user tried to use our \"Forgotten Password\" feature with your email address.\n" +
+            //              "As we could not find your email address in our system, this could not be completed.\n" +
+            //              "Thank you for your patience.";
 
-            string body = "A Point Light user tried to use our \"Forgotten Password\" feature with your email address.\n" +
-                          "As we could not find your email address in our system, this could not be completed.\n" +
-                          "Thank you for your patience.";
+            mail.From = new MailAddress("creative.solutions.murdoch@outlook.com");
+            mail.Body = "A Point Light user tried to use our \"Forgotten Password\" feature with your email address.\n" +
+                        "As we could not find your email address in our system, this could not be completed.\n" +
+                        "Thank you for your patience.";
+            mail.Subject = "Automated Email - Forgotten Password";
 
-            
+            SmtpClient smtpServer = new SmtpClient("smtp.live.com");
+            smtpServer.Port = 587;
+            smtpServer.Credentials = new System.Net.NetworkCredential("creative.solutions.murdoch@outlook.com", "kinetic2017S2") as ICredentialsByHost;
+            smtpServer.EnableSsl = true;
+            ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
 
-            if (File.Exists(fn))
+            //if (File.Exists(fn))
+            if (Database.UserExist(user))
             {
-                User u = GameObject.Find("UserManager").GetComponent<UserManager>().Load(user);
+                User u = Database.SelectUser(user);//GameObject.Find("UserManager").GetComponent<UserManager>().Load(user);
 
-                body = "Hi. Your password is: " + u.Password +
-                       "\nThank you for using Point Light.";
+                //body = "Hi. Your password is: " + u.Password + "\nThank you for using Point Light.";
+                mail.Body = "Hi. Your password has been reset to: " + u_newPassword + "\nThank you for using Point Light.";
 
-                recipient = u.Email;
+                mail.To.Add(u.Email);
+
+                int p = Database.UpdateUser(u.Username,u.Email, u_newPassword);
+                //print("alnsdckjndsc:" + recipient + " update:" + p);
             }
 
-            EmailDetails em = new EmailDetails(recipient, senderEmail, pass, senderName, host);
+            //EmailDetails em = new EmailDetails(recipient, senderEmail, pass, senderName, host);
 
-            Popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "An email has been sent to your account.";
+            Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "An email has been sent to your account.";
 
-            em.Subject = subject;
-            em.Body = body;
-            em.AddCC(senderEmail);
+            //em.Subject = subject;
+            //em.Body = body;
+            //em.AddCC(senderEmail);
 
-            EmailingSystem.SendEmail(em);
+
+            smtpServer.Send(mail);
+
+
+            //EmailingSystem.SendEmail(em);
 
             CreatePopup(Popup, ToMain);
         }
@@ -615,7 +658,7 @@ namespace SportsKinematics.UI
 
             userManager.GetComponent<UserManager>().Save(u);
 
-            popup.transform.FindChild("Popup/ErrorLabel").GetComponent<Text>().text = "Successfully edited your account details.";
+            popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Successfully edited your account details.";
             CreatePopup(popup, NoFunc);
         }
     }

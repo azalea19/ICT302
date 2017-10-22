@@ -52,6 +52,15 @@ namespace SportsKinematics
 
             Serial<User>.Save(m_myUser, u.Username + ".shri", Application.dataPath + "/../Users/" + u.Username + "/");
 
+            if(Database.UserExist(u.Username))
+            {
+                Database.UpdateUser(u.Username, u.Email, u.Password);
+            }
+            else
+            {
+                Database.AddUser(u.Username, u.Email, u.Password);
+            }
+
             m_myUser = u;
         }
 
