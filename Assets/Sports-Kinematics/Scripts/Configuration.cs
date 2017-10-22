@@ -65,7 +65,7 @@ namespace SportsKinematics
         {
             m_temporalOcclusionSettings.onHit = false;
             m_temporalOcclusionSettings.occlusionTime = 0.0f;
-            m_spatialOcclusionSettings.joints = new bool[25];
+            m_spatialOcclusionSettings.joints = new bool[28];
 
             for (int i = 0; i < 25; i++)
             {

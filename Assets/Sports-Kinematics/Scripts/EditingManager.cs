@@ -27,6 +27,17 @@ namespace SportsKinematics
         /// </summary>
         public GameObject m_actionRenderer;
 
+        /// <summary>
+        /// Used for video editing, has to be initialized after the actionRenderer
+        /// </summary>
+        public SportsKinematics.UI.RangeSliderScript m_slider;
+
+
+        /// <summary>
+        /// Used for occlusion editing, has to be initialized after the actionRenderer
+        /// </summary>
+        public SportsKinematics.UI.RangeSliderScript m_occSlider;
+
         // Use this for initialization
         /// <summary>
         /// Start function for GameObject. Initialise data.
@@ -40,8 +51,13 @@ namespace SportsKinematics
             {
                 m_actionRender = m_actionRenderer.GetComponent<ActionRenderer>();
                 Action temp = m_actionLoader.LoadActionFromFile(m_actiondata[0]);
-
+                m_actionRender.m_isEditor = true;
                 m_actionRender.InitiateRenderBody(temp);
+                m_slider.Initialize();
+                m_slider.UpdateHandles();
+
+                m_occSlider.Initialize();
+                m_occSlider.UpdateHandles();
             }
         }
     }

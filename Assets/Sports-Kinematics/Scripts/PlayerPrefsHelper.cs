@@ -30,6 +30,7 @@ public class PlayerPrefsHelper : MonoBehaviour
         PlayerPrefs.SetString("EditedExtension", ".e-action");
         PlayerPrefs.DeleteKey("OverallReport");
         PlayerPrefs.SetString("OverallReport", "");
+        PlayerPrefs.SetString("EditorSettings", ".csv");
         //PlayerPrefs.SetInt("ReloadBody", 0);
         PlayerPrefs.DeleteKey("EmailAddress");
 

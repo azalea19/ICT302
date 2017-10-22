@@ -2,11 +2,53 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Kinect = Windows.Kinect;
-
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.IO;
 namespace SportsKinematics
 {
     public class ActionRenderer : MonoBehaviour
     {
+
+        /// <summary>
+        /// The fps of the fixed update
+        /// </summary>
+        private const int physFPS = 50;
+
+        /// <summary>
+        /// If the script is called in the editor or not
+        /// </summary>
+        public bool m_isEditor = false;
+
+        /// <summary>
+        /// occlusion array for spatial occlusion. True = shown.
+        /// 0 - paddle; 1 - ball; 2...26 - skeleton
+        /// </summary>
+        public bool[] m_occBoolArr;
+
+        public int[] m_occFrameMin;
+        public int[] m_occFrameMax;
+
+        /// <summary>
+        /// true - if the skeleton toggle is being modified
+        /// </summary>
+        private bool m_skeletonChange;
+
+        /// <summary>
+        /// Offset till the first joint; 0 - paddle; 1 - ball; 2 - skeleton
+        /// </summary>
+        private const int m_jointOffset = 3;
+
+        /// <summary>
+        /// material for colouring bones that are being modified
+        /// </summary>
+        public Material m_activeJoint;
+
+        /// <summary>
+        /// material for colouring bones that are not being modified
+        /// </summary>
+        public Material m_inactiveJoint;
+
         /// <summary>
         /// Action to be loaded
         /// </summary>
@@ -33,6 +75,11 @@ namespace SportsKinematics
         /// Frame currently being rendered
         /// </summary>
         private int m_renderFrame;
+
+        /// <summary>
+        /// Last frame to be rendered
+        /// </summary>
+        private int m_maxFrame;
 
         /// <summary>
         /// scale used by kinect to resize cubes as joints
@@ -94,10 +141,6 @@ namespace SportsKinematics
         /// </summary>
         private Configuration m_conf;
 
-        /// <summary>
-        /// occlusion array for spatial occlusion. True = shown.
-        /// </summary>
-        public bool[] m_occBoolArr;
 
         /// <summary>
         /// determine if hit has occured. on "no hit" temporal occlusion, sets to true on first frame. 
@@ -108,7 +151,7 @@ namespace SportsKinematics
         /// GameObject reference for capture facade
         /// </summary>
         public GameObject captureFacade;
-        
+
         /// <summary>
         /// GameObject reference for record kinect data
         /// </summary>
@@ -118,11 +161,6 @@ namespace SportsKinematics
         /// Script reference for record kinect data
         /// </summary>
         RecordKinectData m_rkd;
-
-        /// <summary>
-        /// material for colouring bones
-        /// </summary>
-        public Material m_boneMaterial;
 
         /// <summary>
         /// Game Object reference to striker manager for opponent. allows rendering of striker.
@@ -142,7 +180,7 @@ namespace SportsKinematics
         /// <summary>
         /// Maximum allowable speed
         /// </summary>
-        public const float m_MAX_SPEED = 100f;
+        public const float m_MAX_SPEED = 500f;
 
         /// <summary>
         /// determine if opponent is playing right handed
@@ -174,6 +212,8 @@ namespace SportsKinematics
         /// </summary>
         private float m_releaseTime;
 
+
+
         /// <summary>
         /// Initiate the objects in scene
         /// </summary>
@@ -190,8 +230,18 @@ namespace SportsKinematics
         void InitValues()
         {
             m_renderFrame = 0;
+            m_skeletonChange = false;
+            m_maxFrame = 0;
             m_drawLines = true;
-            m_occBoolArr = new bool[25];
+            m_occBoolArr = new bool[25 + m_jointOffset];
+            m_occFrameMin = new int[25 + m_jointOffset];
+            m_occFrameMax = new int[25 + m_jointOffset];
+            for (int i = 0; i < 25 + m_jointOffset; i++)
+            {
+                m_occBoolArr[i] = false;
+                m_occFrameMin[i] = m_maxFrame;
+                m_occFrameMax[i] = m_maxFrame;
+            }
             m_occTimer = 0.0f;
             m_LerpMinimum = 1f;
             m_speedCounter = 0;
@@ -215,32 +265,50 @@ namespace SportsKinematics
                 m_rkd = recordKinectData.GetComponent<RecordKinectData>();
 
             InitObjects();
-            InitValues();
+            if (!m_isEditor)
+            {
+                InitValues();
+
+            }
         }
 
         /// <summary>
-        /// accessor for render frame. READ-ONLY
+        /// accessor for render frame.
         /// </summary>
         public int RenderFrame
         {
             get { return m_renderFrame; }
+            set { m_renderFrame = value; }
+        }
+
+        /// <summary>
+        /// Maximum possible frame
+        /// Author: Olesia Kochergina
+        /// </summary>
+        public int FrameMax
+        {
+            get { return m_maxFrame; }
+
+            set { m_maxFrame = value; }
         }
 
         /// <summary>
         /// Occludes all joints drawn to screen. Used to apply temporal occlusion
         /// </summary>
-        void OccludeAllJoints()
+        void OccludeAllJoints(bool active)
         {
             for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
             {
-                m_occBoolArr[(int)jt] = false;
+                m_occBoolArr[(int)jt + m_jointOffset] = active;
 
                 if (jt == Kinect.JointType.ThumbRight)
                 {
-                    m_ball.layer = LayerMask.NameToLayer("Occluded");
+                    // m_ball.layer = LayerMask.NameToLayer("Occluded");
                 }
             }
         }
+
+
 
         /// <summary>
         /// locally store a configuration, and apply it to the scene
@@ -248,7 +316,8 @@ namespace SportsKinematics
         /// <param name="conf">configuration to be initialised</param>
         public void InitConfig(Configuration conf)
         {
-            m_occBoolArr = conf.OcclusionArray;
+            //m_occBoolArr = conf.OcclusionArray;
+
 
             if (!conf.TemporalOnHitIsActive)
             {
@@ -289,20 +358,14 @@ namespace SportsKinematics
         /// </summary>
         void FixedUpdate()
         {
+            m_reachedEnd = false;
             if (m_play && m_speed != 0.0f && !m_reachedEnd)
             {
-                if (m_trackedBody)
+                UpdateBody();
+                if (m_renderFrame < m_maxFrame - 3)
                 {
-                    try
-                    {
-                        RefreshBody(m_trackedBody);
-                    }
-                    catch
-                    {
-                        Debug.Log("Body not found!");
-                    }
+                    m_renderFrame += (int)m_speed / physFPS;
                 }
-
                 if (m_ball)
                 {
                     if (m_timer >= m_releaseTime - m_ball.GetComponent<BallScript>().TimeOfCollide)
@@ -319,7 +382,46 @@ namespace SportsKinematics
 
             if ((m_occTimer >= m_maxTime && m_maxTime > 0.0f) || (m_hitOccured && m_maxTime == 0.001f))
             {
-                OccludeAllJoints();
+                Debug.Log("Occlude");
+                OccludeAllJoints(false);
+            }
+        }
+
+        /// <summary>
+        /// Updates the skeleton even if the editing video is not playing.
+        /// Useful for the range slider min lower value modifications.
+        /// Author: Olesia Kochergina
+        /// </summary>
+        public void UpdateBody()
+        {
+            if (m_trackedBody)
+            {
+                try
+                {
+                    RefreshBody(m_trackedBody);
+                    if (m_ball)
+                    {
+                        if ((m_occFrameMin[1] >= m_renderFrame && m_occFrameMax[1] >= m_renderFrame)
+                             || (m_occFrameMin[1] <= m_renderFrame && m_occFrameMax[1] <= m_renderFrame))
+
+                        {
+                            m_ball.layer = LayerMask.NameToLayer("Default");
+                        }
+                        else
+                        {
+                            m_ball.layer = LayerMask.NameToLayer("Occluded");
+                        }
+                    }
+
+                }
+                catch
+                {
+                    Debug.Log("Body not found!");
+                }
+            }
+            else
+            {
+
             }
         }
 
@@ -334,9 +436,16 @@ namespace SportsKinematics
                 InitObjects();
                 InitValues();
             }
-
             m_action = action;
 
+            m_maxFrame = m_action.Count;
+            for (int i = 0; i < m_occFrameMax.Length; i++)
+            {
+                m_occFrameMax[i] = m_maxFrame;
+                m_occFrameMin[i] = m_maxFrame;
+            }
+
+            ReadConfig();
             if (m_trackedBody == null)
             {
                 try
@@ -351,6 +460,59 @@ namespace SportsKinematics
                 catch
                 {
                 }
+            }
+
+            m_reachedEnd = false;
+        }
+
+        private void ReadConfig()
+        {
+            if (!m_isEditor)
+            {
+                string username = PlayerPrefs.GetString("CurrentUsername");
+                //string ext = "";
+                //if (mode == "Unedited")
+                //    ext = PlayerPrefs.GetString("UneditedExtension");
+                //else
+                //    ext = PlayerPrefs.GetString("EditedExtension");
+
+                using (var w = new StreamReader(PlayerPrefs.GetString("CurrentUserDataPath") + "/Actions/" + "Edited" + "/" + m_action.Name))
+                {
+                    string path = "/../Users/" + username + "/ActionData/" + "Edited" + "/" + m_action.Name;
+
+                    string row = w.ReadLine();
+                    {
+                        string[] value = row.Split(',');
+                        float.TryParse(value[0], out m_speed);
+                    }
+                    row = w.ReadLine();
+                    {
+                        string[] value = row.Split(',');
+                        for (int i = 0; i < value.Length; i++)
+                        {
+                            bool.TryParse(value[i], out m_occBoolArr[i]);
+                            m_occBoolArr[i] = true;
+                        }
+                    }
+
+                    row = w.ReadLine();
+                    {
+                        string[] value = row.Split(',');
+                        for (int i = 0; i < value.Length; i++)
+                            int.TryParse(value[i], out m_occFrameMin[i]);
+                    }
+
+                    row = w.ReadLine();
+                    {
+                        string[] value = row.Split(',');
+                        for (int i = 0; i < value.Length; i++)
+                            int.TryParse(value[i], out m_occFrameMax[i]);
+                    }
+                    w.Close();
+                    // w.Flush();
+                    //w.Close();
+                }
+
             }
         }
 
@@ -384,15 +546,117 @@ namespace SportsKinematics
         private GameObject RenderBody()
         {
             GameObject body = new GameObject("Opponent");
-            body.transform.position = new Vector3(0.0f, 11.97f, 20.08f);
+
+            body.transform.position = new Vector3(0.0f, 16.0f, 20.08f);
             body.transform.rotation = new Quaternion(0f, 180f, 0f, 1f);
             body.transform.localScale = new Vector3(-1f, 1f, 1f);
+
+
             RenderJoints(body);
             RefreshBody(body);
             RefreshBody(body);  //fixes a transform issue
+            AddSkeletonOcclusionOptions(body);
+            //fix for simulation
+            m_trackedBody = body;
             ResetRenderFrame();
-
             return body;
+        }
+
+        /// <summary>
+        /// Author: Olesia Kochergina
+        /// Should only be used in the editor
+        /// </summary>
+        void AddSkeletonOcclusionOptions(GameObject body)
+        {
+            if (m_isEditor)
+            {
+                Vector3 position = new Vector3();
+                GameObject content = GameObject.Find("Occlusion Panel").transform.GetChild(0).GetChild(0).gameObject;
+
+                float yPos = content.transform.GetChild(m_jointOffset - 1).position.y;
+
+                content.transform.GetChild(0).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(0); });
+                content.transform.GetChild(1).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(1); });
+                content.transform.GetChild(2).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(2); });
+                for (int i = 0; i < body.transform.childCount; i++)
+                {
+                    GameObject option = GameObject.Instantiate(content.transform.GetChild(m_jointOffset - 1).gameObject);
+                    option.name = body.transform.GetChild(i).name;
+                    position = content.transform.GetChild(m_jointOffset - 1).position;
+                    yPos -= 30;
+                    position.y = yPos;
+                    option.transform.position = position;
+                    option.GetComponent<Toggle>().isOn = m_occBoolArr[i + m_jointOffset];
+                    //otherwise delegate increments i in all Occlude functions, so th etemporary variable j needs to be created
+                    int j = i;
+                    option.GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(j + m_jointOffset); });
+                    option.transform.parent = content.transform;
+
+                    option.transform.localScale = content.transform.GetChild(1).localScale;
+
+                    option.transform.GetChild(1).GetComponent<Text>().text = body.transform.GetChild(i).name;
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Author: Olesia Kochergina
+        /// </summary>
+        /// <param name="index">0 - paddle, 1 - ball, 2..26 - skeleton</param>
+        public void Occlude(int index)
+        {
+            if (index == 0)
+            {
+                Debug.Log("Paddle Occlusion");
+                m_occBoolArr[0] = !m_occBoolArr[0];
+            }
+            else if (index == 1)
+            {
+                Debug.Log("Ball Occlusion");
+                m_occBoolArr[1] = !m_occBoolArr[1];
+            }
+            else if (index == 2)
+            {
+                m_occBoolArr[2] = !m_occBoolArr[2];
+                OccludeAllJoints(m_occBoolArr[2]);
+                //prevents modification of single joints using Occlude(index) in option.GetComponent<Toggle>().isOn callback
+                m_skeletonChange = true;
+
+                for (int i = m_jointOffset; i < m_occBoolArr.Length; i++)
+                {
+                    GameObject.Find("Occlusion Panel").transform.GetChild(0).GetChild(0).GetChild(i).GetComponent<Toggle>().isOn = m_occBoolArr[i];
+                }
+                m_skeletonChange = false;
+            }
+            else
+            {
+                GameObject temp = GameObject.Find("Opponent");
+                if (!m_skeletonChange)
+                    m_occBoolArr[index] = !m_occBoolArr[index];
+
+                if (m_trackedBody)
+                {
+                    if (m_occBoolArr[index])
+                    {
+                        if (m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<LineRenderer>())
+                            m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<LineRenderer>().material = m_activeJoint;
+                        m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<MeshRenderer>().material = m_activeJoint;
+
+                        //occluded layer is not visible by the main camera
+                        //temp.transform.GetChild(index - 2).gameObject.layer = LayerMask.NameToLayer("Occluded");//.SetActive(!temp.transform.GetChild(index - 2).gameObject.activeSelf);
+                        //m_occFrameMin[index] = m_renderFrame;
+                    }
+                    else
+                    {
+                        if (m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<LineRenderer>())
+                            m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<LineRenderer>().material = m_inactiveJoint;
+                        m_trackedBody.transform.GetChild(index - m_jointOffset).GetComponent<MeshRenderer>().material = m_inactiveJoint;
+                        //temp.transform.GetChild(index - 2).gameObject.layer = LayerMask.NameToLayer("Default");
+                        //m_occFrameMin[index] = m_renderFrame;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -404,16 +668,12 @@ namespace SportsKinematics
             Dictionary<Kinect.JointType, float[]> actionPositionData;
             Dictionary<Kinect.JointType, float[]> nextActionPositionData;
             GetActionPositionData(out actionPositionData, out nextActionPositionData);
-
             Dictionary<Kinect.JointType, float[]> actionOrientationData;
             Dictionary<Kinect.JointType, float[]> nextActionOrientationData;
             GetActionOrientationData(out actionOrientationData, out nextActionOrientationData);
-
             for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
             {
                 GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-                jointObj.GetComponent<MeshRenderer>().material = m_boneMaterial;
 
                 jointObj.transform.localScale = FloatToVec(m_kinectScale);
                 jointObj.name = jt.ToString();
@@ -429,22 +689,30 @@ namespace SportsKinematics
 
                 jointObj.transform.parent = body.transform;
                 jointObj.transform.localPosition = FloatToVec(jointStart);
-
-                if (!m_occBoolArr[(int)jt])
+                if (!m_occBoolArr[(int)jt + m_jointOffset])
                 {
-                    GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Occluded");
+                    jointObj.GetComponent<MeshRenderer>().material = m_inactiveJoint;
+                    // GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Occluded");
+                }
+                else
+                {
+
+                    jointObj.GetComponent<MeshRenderer>().material = m_activeJoint;
                 }
 
                 //draw striker
-                if (jt == Kinect.JointType.HandRight && m_HandRight) {
-                    CreateStrikerOnHand(jointObj.transform, jt, m_occBoolArr[(int)jt]);
+                if (jt == Kinect.JointType.HandRight && m_HandRight)
+                {
+                    CreateStrikerOnHand(jointObj.transform, jt, m_occBoolArr[(int)jt + m_jointOffset]);
                 }
                 else if (jt == Kinect.JointType.HandLeft && !m_HandRight)
                 {
-                    CreateStrikerOnHand(jointObj.transform, jt, m_occBoolArr[(int)jt]);
+                    CreateStrikerOnHand(jointObj.transform, jt, m_occBoolArr[(int)jt + m_jointOffset]);
                 }
             }
         }
+
+
 
         /// <summary>
         /// Refresh body every frame
@@ -452,7 +720,8 @@ namespace SportsKinematics
         /// <param name="body">body that needs to be refreshed</param>
         private void RefreshBody(GameObject body)
         {
-            if (!m_reset && m_renderFrame < m_action.Count - 3) //-3 because -1 just cause & -2 for current and next positions
+            m_reset = false;
+            if (!m_reset && m_renderFrame < m_maxFrame - 3) //-3 because -1 just cause & -2 for current and next positions
             {
                 Dictionary<Kinect.JointType, float[]> actionPositionData;
                 Dictionary<Kinect.JointType, float[]> nextActionPositionData;
@@ -461,16 +730,30 @@ namespace SportsKinematics
                 Dictionary<Kinect.JointType, float[]> actionOrientationData;
                 Dictionary<Kinect.JointType, float[]> nextActionOrientationData;
                 GetActionOrientationData(out actionOrientationData, out nextActionOrientationData);
-
+                int i = 0;
                 for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
                 {
-                    Transform jointTran = body.transform.FindChild(jt.ToString());
-
-                    if (!m_occBoolArr[(int)jt])
+                    //Modified by Olesia Kochergina - faster approach
+                    Transform jointTran = body.transform.GetChild(i); //.FindChild(jt.ToString());
+                    i++;
+                    if (!m_occBoolArr[(int)jt + m_jointOffset])
                     {
-                        GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Occluded");
-                    }
+                        //  GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Occluded");
+                        //Debug.Log("refreshbody23");
+                        //continue;
+                    }//else
+                    {
+                        if ((m_occFrameMin[(int)jt + m_jointOffset] >= m_renderFrame && m_occFrameMax[(int)jt + m_jointOffset] >= m_renderFrame)
+                            || (m_occFrameMin[(int)jt + m_jointOffset] <= m_renderFrame && m_occFrameMax[(int)jt + m_jointOffset] <= m_renderFrame))
 
+                        {
+                            GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Default");
+                        }
+                        else
+                        {
+                            GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Occluded");
+                        }
+                    }
                     //Lerp Position
                     float[] nextActionPosition;
                     nextActionPositionData.TryGetValue(jt, out nextActionPosition);
@@ -478,35 +761,34 @@ namespace SportsKinematics
 
                     Kinect.JointType partner;
                     m_boneDic.TryGetValue(jt, out partner); //to be used later
-
                     //Lerp Rotation
                     float[] nextActionOrientation;
                     nextActionOrientationData.TryGetValue(jt, out nextActionOrientation);
-
                     if (SmoothRotation(jointTran, nextActionOrientation, jt) && jt == Kinect.JointType.ThumbRight)
                     {
-                        if (m_renderFrame < m_action.Count - 2)
+                        if (m_renderFrame < m_maxFrame - 2)
                         {
                             IncRenderFrame();
+
                         }
                     }
-
                     //Draw Striker on hand joint
                     if (jt == Kinect.JointType.HandRight && m_HandRight)
                     {
-                        RefreshStrikerOnHand(jointTran, FloatToQuat(nextActionOrientation), jt, m_occBoolArr[(int)jt]);
+                        RefreshStrikerOnHand(jointTran, FloatToQuat(nextActionOrientation), jt, m_occBoolArr[0]);
                     }
-                    else if(jt == Kinect.JointType.HandLeft && !m_HandRight)
+                    else if (jt == Kinect.JointType.HandLeft && !m_HandRight)
                     {
-                        RefreshStrikerOnHand(jointTran, FloatToQuat(nextActionOrientation), jt, m_occBoolArr[(int)jt]);
+                        RefreshStrikerOnHand(jointTran, FloatToQuat(nextActionOrientation), jt, m_occBoolArr[0]);
                     }
-
                     RefreshBodyLines(body, actionPositionData, jointTran, jt);
                 }
             }
             else
             {
-                m_reachedEnd = true;
+                GameObject.Find("PlayButton").GetComponent<SportsKinematics.UI.Pause>().TaskOnClick(false);
+                //m_reachedEnd = true;
+                // Debug.Log("reached end: " + m_reset + "  " + m_renderFrame + "  " + m_maxFrame);
             }
         }
 
@@ -541,6 +823,17 @@ namespace SportsKinematics
                 {
                     DisableLineRender(body, jt);
                 }
+            }
+            else //if the head
+            {
+                //if (m_occBoolArr[(int)jt + m_jointOffset])
+                //{
+                //    body.transform.FindChild(jt.ToString()).GetComponent<MeshRenderer>().material = m_activeJoint;
+                //}
+                //else
+                //{
+                //    body.transform.FindChild(jt.ToString()).GetComponent<MeshRenderer>().material = m_inactiveJoint;
+                //}
             }
         }
 
@@ -581,7 +874,10 @@ namespace SportsKinematics
         {
             LineRenderer lr = GameObject.Find("Opponent/" + jt.ToString()).AddComponent<LineRenderer>();
             lr.positionCount = 2;
-            lr.material = m_boneMaterial;
+            if (m_occBoolArr[(int)jt + m_jointOffset])
+                lr.material = m_activeJoint;
+            else
+                lr.material = m_inactiveJoint;
             lr.startWidth = 0.05f;
             lr.endWidth = 0.05f;
 
@@ -596,7 +892,7 @@ namespace SportsKinematics
         /// <param name="jt">joint to be occluded</param>
         /// <param name="occluded">determine whether or not the striker should also be occluded.</param>
         private void CreateStrikerOnHand(Transform jointTran, Kinect.JointType jt, bool occluded)
-        { 
+        {
             m_strikerScript.CreateStriker(jointTran, occluded);
         }
 
@@ -807,25 +1103,28 @@ namespace SportsKinematics
 
         /// <summary>
         /// determine if frame should be incremented
+        /// Modified: Olesia Kochergina (the elapsed time should be based on the fps and the speed of the simulation and not on the actual time)
         /// </summary>
         public void IncRenderFrame()
         {
-            if ((m_MAX_SPEED - m_speed) <= m_speedCounter)
-            {
-                //Time inc
-                float deltaTime = Time.time - m_lastTime;
-                deltaTime /= m_speedCounter + 1;
-                m_lastTime = Time.time;
-                m_timer += deltaTime;
+            //if ((m_MAX_SPEED - m_speed) <= m_speedCounter)
+            //{
+            //    //Time inc
+            //    float deltaTime = Time.time - m_lastTime;
+            //    deltaTime /= m_speedCounter + 1;
+            //    m_lastTime = Time.time;
+            //    m_timer += deltaTime;
 
-                if (m_hitOccured)
-                    m_occTimer += deltaTime;
+            //    if (m_hitOccured)
+            //        m_occTimer += deltaTime;
 
-                m_renderFrame++;
-                m_speedCounter = 0;
-            }
-            else
-                m_speedCounter++;
+            //    m_renderFrame++;
+            //    m_speedCounter = 0;
+            //}
+            //else
+            //    m_speedCounter++;
+
+            m_timer = m_renderFrame / m_speed;
         }
 
         /// <summary>
@@ -836,7 +1135,7 @@ namespace SportsKinematics
             m_reset = true;
             m_renderFrame = 0;
             RefreshBody(m_trackedBody);
-            if(m_conf != null)
+            if (m_conf != null)
                 InitConfig(m_conf);
             m_occTimer = 0.0f;
             m_timer = 0.0f;
@@ -844,22 +1143,26 @@ namespace SportsKinematics
             m_reset = false;
             m_lastTime = Time.time;
 
+            m_maxFrame = m_action.Count;
             if (m_ball && m_renderFrame != 0)
             {
                 //Determine ball target
                 DetermineBallTarget(m_trackedBody);
             }
+
+
         }
 
         /// <summary>
-        /// saves data being trimmed
+        /// saves data in an action file
         /// </summary>
-        public void SaveTrimmedData()
+        public void SaveData()
         {
             List<Dictionary<Kinect.JointType, float[]>> newActionPositionData = new List<Dictionary<Kinect.JointType, float[]>>();
             List<Dictionary<Kinect.JointType, float[]>> newActionOrientationData = new List<Dictionary<Kinect.JointType, float[]>>();
-            
-            for (int i = 0; i < m_action.CurrentActionPositionData.Count; i++)
+
+            //Changed by Olesia Kochergina: for (int i = 0; i < m_action.CurrentActionPositionData.Count; i++)
+            for (int i = 0; i < m_maxFrame; i++)
             {
                 if (m_renderFrame <= i)
                 {
@@ -869,34 +1172,51 @@ namespace SportsKinematics
             }
 
             m_rkd.SaveEditedLogData("../Edited/" + m_action.Name, newActionPositionData, newActionOrientationData);
+            SaveSpatialOcclusion(m_action.Name);
         }
 
         /// <summary>
-        /// saves data from slicing
+        /// Saves spatial occlusion data
         /// </summary>
-        public void SaveSlicedData()
+        /// <param name="filename">name of the file</param>
+        private void SaveSpatialOcclusion(string filename)
         {
-            List<Dictionary<Kinect.JointType, float[]>> newActionPositionData = new List<Dictionary<Kinect.JointType, float[]>>();
-            List<Dictionary<Kinect.JointType, float[]>> newActionOrientationData = new List<Dictionary<Kinect.JointType, float[]>>();
+            string path = (PlayerPrefs.GetString("CurrentUserDataPath") + "/Actions/Edited/" + filename);
+            // m_conf.SpatialIsActive = true;
+            string body = "";// PlayerPrefs.GetString("EditorSettings");
+            Debug.Log(body);
+            body += m_speed + "," + m_renderFrame + "," + m_maxFrame + "\n";
 
-            for (int i = 0; i < m_action.CurrentActionPositionData.Count; i++)
+            for (int i = 0; i < m_occBoolArr.Length; i++)
             {
-                newActionPositionData.Add(m_action.CurrentActionPositionData[i]);
-                newActionOrientationData.Add(m_action.CurrentActionOrientationData[i]);
-
-                if (m_renderFrame == i)
-                {
-                    m_rkd.SaveEditedLogData("../Edited/" + m_action.Name +"Slice-1", newActionPositionData, newActionOrientationData);
-                    newActionPositionData.Clear();
-                    newActionOrientationData.Clear();
-                }
-                else if (i == m_action.CurrentActionPositionData.Count - 1)
-                {
-                    m_rkd.SaveEditedLogData("../Edited/" + m_action.Name + "Slice-2", newActionPositionData, newActionOrientationData);
-                    newActionPositionData.Clear();
-                    newActionOrientationData.Clear();
-                }
+                body += m_occBoolArr[i] + ",";
             }
+            body = body.Substring(0, body.Length - 1);
+            body += "\n";
+            for (int i = 0; i < m_occFrameMax.Length; i++)
+            {
+                body += m_occFrameMin[i] + ",";
+            }
+            body = body.Substring(0, body.Length - 1);
+            body += "\n";
+            for (int i = 0; i < m_occFrameMin.Length; i++)
+            {
+                body += m_occFrameMax[i] + ",";
+            }
+            body = body.Substring(0, body.Length - 1);
+
+            PlayerPrefs.SetString("EditorSettings", body);
+            Debug.Log(body);
+            Reporter.Save(path, body);
+        }
+
+        /// <summary>
+        /// saves data in a specified file
+        /// </summary>
+        public void SaveAsData(string filename)
+        {
+            m_action.Name = filename;
+            SaveData();
         }
 
         /// <summary>

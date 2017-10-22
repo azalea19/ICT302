@@ -164,7 +164,7 @@ public class SteamVR_Settings : EditorWindow
 
 		foreach (var path in dlls)
 		{
-			if (!File.Exists("/" + path))
+			if (!File.Exists(Application.dataPath + "/" + path))
 				continue;
 
 			if (AssetDatabase.DeleteAsset("Assets/" + path))

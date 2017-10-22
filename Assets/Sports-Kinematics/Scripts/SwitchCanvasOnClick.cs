@@ -29,6 +29,14 @@ namespace SportsKinematics.UI
         public GameObject m_userManager;
 
         /// <summary>
+        /// To make sure that the canvas to be activated is disabled.
+        /// </summary>
+        void Start()
+        {
+            m_canvasToActivate.gameObject.SetActive(false);
+        }
+
+        /// <summary>
         /// Switches one canvas to another.
         /// Disables the canvas and all children on the canvas within the deactivated canvas
         /// and enables the activated canvas and children.

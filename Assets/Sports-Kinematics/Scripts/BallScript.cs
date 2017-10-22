@@ -257,8 +257,8 @@ namespace SportsKinematics
         public void PrepareToFire(Vector3 targetVec)//, int targetFrame, uint sampleRate
         {          
             m_myTarget = targetVec;
-            //DrawDebugLines(targetVec, new Color(1,1,1));
-            //DrawDebugLines(m_myTarget, new Color(0, 1, 1));
+           // DrawDebugLines(targetVec, new Color(1,1,1));
+           // DrawDebugLines(m_myTarget, new Color(0, 1, 1));
         }
 
         /// <summary>
