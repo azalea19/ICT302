@@ -15,7 +15,7 @@ namespace SportsKinematics.UI
     {
 
         public ActionRenderer m_actionRenderer;
-
+        public bool m_saveValues = false;
         protected IntervalSlider m_slider;
 
         private bool start = false;
@@ -40,12 +40,16 @@ namespace SportsKinematics.UI
         // Update is called once per frame
         protected virtual void Update()
         {
-            if (m_prevFrame != m_actionRenderer.RenderFrame)
+            if (m_prevFrame != CorrectedFrameStart())
             {
-                m_slider.lowerValue = m_actionRenderer.RenderFrame;
+                m_slider.lowerValue = CorrectedFrameStart();
             }
 
-            m_prevFrame = m_actionRenderer.RenderFrame;
+            m_prevFrame = CorrectedFrameStart();
+        }
+
+       protected int CorrectedFrameStart() {
+            return m_actionRenderer.RenderFrame - m_actionRenderer.m_exp.FrameStart;
         }
 
 
@@ -53,17 +57,17 @@ namespace SportsKinematics.UI
         {
             // if (m_prevUpperValue != (int)m_slider.upperValue)
             {
-                 m_actionRenderer.FrameMax = (int)m_slider.upperValue;
-                m_prevUpperValue = (int)m_slider.upperValue;
+                 m_actionRenderer.FrameMax = (int)m_slider.upperValue+m_actionRenderer.m_exp.FrameStart;
+                m_prevUpperValue = (int)m_slider.upperValue+ m_actionRenderer.m_exp.FrameStart;
                
             }
 
-            if (m_prevLowerValue != (int)m_slider.lowerValue && m_actionRenderer.RenderFrame != (int)m_slider.lowerValue)
+            if (m_prevLowerValue != (int)m_slider.lowerValue && CorrectedFrameStart() != (int)m_slider.lowerValue)
             {
-                m_actionRenderer.RenderFrame = (int)m_slider.lowerValue;
+                m_actionRenderer.RenderFrame = (int)m_slider.lowerValue + m_actionRenderer.m_exp.FrameStart;
                 
                 m_actionRenderer.UpdateBody();
-                m_prevLowerValue = (int)m_slider.lowerValue;
+                m_prevLowerValue = (int)m_slider.lowerValue+ m_actionRenderer.m_exp.FrameStart;
                 GameObject.Find("PlayButton").GetComponent<Pause>().TaskOnClick(false);
             }
             UpdateHandleText();
@@ -82,7 +86,7 @@ namespace SportsKinematics.UI
         public void Initialize()
         {
             m_slider = GetComponent<IntervalSlider>();
-            m_slider.maxValue = m_actionRenderer.FrameMax;
+            m_slider.maxValue = m_actionRenderer.m_exp.FrameEnd-m_actionRenderer.m_exp.FrameStart;
             m_slider.lowerValue = 0;
             m_slider.upperValue = m_slider.maxValue;
             m_slider.minValue = 0;

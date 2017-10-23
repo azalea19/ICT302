@@ -1,23 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 namespace SportsKinematics
 {
     public class BallBehaviour : MonoBehaviour
     {
 
         public Vector3 m_destination;
+        private Vector3 m_initPosition;
+        public InputField m_field;
         public Rigidbody m_body;
         private float m_mass;
-        public float m_boost = 250.0f;
+        public float m_boost = 200.0f;
+        private float m_ballSpeed = 100;
         private GameObject debugger;
         // Use this for initialization
         void Start()
         {
             debugger = new GameObject("DebugLine");
             m_body = GetComponent<Rigidbody>();
-
+            m_initPosition = transform.position;
             m_mass = m_body.mass;
 
         }
@@ -27,28 +30,68 @@ namespace SportsKinematics
         {
             if (Input.GetMouseButtonDown(1))
             {
-                m_destination = GameObject.Find("PadParent").transform.position;
-                ApplyImpulse();
-            }
-            if (Input.GetKey(KeyCode.Q))
-            {
+                Reset();
                 transform.position = cursorOnTransform;
+                m_initPosition = transform.position;
             }
         }
 
-        void ApplyImpulse()
+        void Reset()
         {
-            //reset current velocity
+            transform.position = m_initPosition;
             m_body.velocity = Vector3.zero;
-            //calculate direction of the impulse based on the position of the paddle and the ball's position
+            m_body.angularVelocity = Vector3.zero;
+            m_body.angularDrag = 0.0f;
+            m_body.ResetInertiaTensor();
+        }
+        public void UpdateDestination()
+        {
+
+            m_destination = GameObject.Find("PadParent").transform.position;
+        }
+
+        public void UpdateSpeed()
+        {
+            if (m_field && m_field.text != "" && m_field.text !="0")
+            {
+                Debug.Log("speed");
+                float.TryParse(m_field.text, out m_ballSpeed);
+            }
+        }
+
+        public void ApplyImpulse()
+        {
+            Reset();
             Vector3 direction = m_destination - transform.position;
-            //calculate the speed of change
-            float m_speed = Vector3.Distance(m_destination, transform.position) * Time.deltaTime * m_boost;
-            //calculate the impulse vector
+            Debug.Log("ball speed" + m_ballSpeed);
+            transform.position = m_destination + GameObject.Find("PadParent").transform.forward;
+            float m_speed = Vector3.Distance(m_destination, transform.position) / 0.05f;
+            m_speed /= (1.0f / (m_ballSpeed/100));
             Vector3 m_forceToApply = m_mass * m_speed * direction.normalized;
+            //reset current velocity
+            // m_body.velocity = Vector3.zero;
+            //calculate direction of the impulse based on the position of the paddle and the ball's position
+            //Vector3 direction = m_destination - transform.position;
+            ////calculate the speed of change
+            //float m_speed = Vector3.Distance(m_destination, transform.position) * Time.deltaTime * m_boost;
+            ////calculate the impulse vector
+            //Vector3 m_forceToApply = m_mass * m_speed * direction.normalized;
+
+
+            Vector3 imp = new Vector3();
+            float time = .5f;
+            for (int i = 0; i < 3; i++)
+            {
+                imp[i] = m_mass * (m_destination[i] - transform.position[i]) / time - 0.0f;
+            }
+            imp.y = m_mass * (m_destination.y - transform.position.y) / time - 0 - 0.5f * -9.81f * time;
 
 
             m_body.AddForce(m_forceToApply, ForceMode.Impulse);
+            // m_body.velocity = m_forceToApply;
+            // m_body.useGravity = false;
+
+            Debug.Log("Impulse: " + imp + "  ");
             DrawDebugLines(m_destination, Color.green);
         }
 
