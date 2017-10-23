@@ -1,9 +1,17 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 48d08c661350f8b42823a575e108d6bb
 timeCreated: 1508577304
 licenseType: Free
 NativeFormatImporter:
   mainObjectFileID: 100100000
+=======
+guid: d0cbfe67e5266ea4797ae1e544f61a1b
+timeCreated: 1508587212
+licenseType: Free
+NativeFormatImporter:
+  mainObjectFileID: -1
+>>>>>>> Editor with 3 canvases
   userData: 
   assetBundleName: 
   assetBundleVariant: 
