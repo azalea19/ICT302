@@ -286,6 +286,10 @@ namespace SportsKinematics.UI
             }
         }
 
+        /// <summary>
+        /// Creates a random password
+        /// </summary>
+        /// <returns>randomly generated password</returns>
         private string GeneratePassword()
         {
             string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -357,7 +361,7 @@ namespace SportsKinematics.UI
             if (userValid && passValid && emailValid)
             {
                 //if (!(File.Exists(path + "/../Users/" + user + "/" + user + ".shri")))
-                if (!Database.UserExist(user))
+                if (!Server.Database.UserExist(user))
                     {
                     t_folders = new Thread(() => CreateSubDirectories(path, user));
                     if (!t_folders.IsAlive)
@@ -426,10 +430,10 @@ namespace SportsKinematics.UI
             if (userValid && passValid)
             {
                 //if (File.Exists(fn))
-                if(Database.UserExist(username))
+                if(Server.Database.UserExist(username))
                 {
                     //User user = GameObject.Find("UserManager").GetComponent<UserManager>().Load(username);
-                    User user = Database.SelectUser(username);
+                    User user = Server.Database.SelectUser(username);
                     
                     if (Match(pass.GetHashCode().ToString(), user.Password))
                     {
@@ -552,16 +556,16 @@ namespace SportsKinematics.UI
             ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
 
             //if (File.Exists(fn))
-            if (Database.UserExist(user))
+            if (Server.Database.UserExist(user))
             {
-                User u = Database.SelectUser(user);//GameObject.Find("UserManager").GetComponent<UserManager>().Load(user);
+                User u = Server.Database.SelectUser(user);//GameObject.Find("UserManager").GetComponent<UserManager>().Load(user);
 
                 //body = "Hi. Your password is: " + u.Password + "\nThank you for using Point Light.";
                 mail.Body = "Hi. Your password has been reset to: " + u_newPassword + "\nThank you for using Point Light.";
 
                 mail.To.Add(u.Email);
 
-                int p = Database.UpdateUser(u.Username,u.Email, u_newPassword);
+                int p = Server.Database.UpdateUser(u.Username,u.Email, u_newPassword);
                 //print("alnsdckjndsc:" + recipient + " update:" + p);
             }
 

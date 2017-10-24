@@ -52,14 +52,17 @@ namespace SportsKinematics
 
             Serial<User>.Save(m_myUser, u.Username + ".shri", Application.dataPath + "/../Users/" + u.Username + "/");
 
-            if(Database.UserExist(u.Username))
+            if(Server.Database.UserExist(u.Username))
             {
-                Database.UpdateUser(u.Username, u.Email, u.Password);
+                Server.Database.UpdateUser(u.Username, u.Email, u.Password);
             }
             else
             {
-                Database.AddUser(u.Username, u.Email, u.Password);
+                Server.Database.AddUser(u.Username, u.Email, u.Password);
             }
+            print("../Users/" + u.Username + "/" + u.Username + ".shri");
+            string r = Server.Files.UploadFile(Application.dataPath + "/../Users/" + u.Username + "/","../Users/" + u.Username + "/", u.Username + ".shri");
+            print(r);
 
             m_myUser = u;
         }

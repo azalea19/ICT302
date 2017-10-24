@@ -3,12 +3,12 @@ using System.Net;
 using System.Collections.Specialized;
 using System.IO;
 
-namespace SportsKinematics
+namespace SportsKinematics.Server
 {
     public static class Database
     {
-        //static string site = "http://localhost/ICT302_Test/";
-        static string site = "http://10.1.1.226/302test/";
+        static string site = "http://localhost/302test/";
+        //static string site = "http://10.1.1.226/302test/";
 
 
         //DATA INSERTION

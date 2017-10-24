@@ -181,6 +181,9 @@ namespace SportsKinematics
                 {
                     string savePath = PlayerPrefs.GetString("CurrentUserDataPath") + "Playlists/";
                     Serial<Playlist>.Save(m_newPlaylist, filename, savePath);
+
+                    Server.Files.UploadFile(savePath, PlayerPrefs.GetString("CurrentUsername") + "Playlists/", filename);
+
                     Directory.Move(PlayerPrefs.GetString("CurrentUserDataPath") + "/Configurations/newConfigurations/", PlayerPrefs.GetString("CurrentUserDataPath") + "/Configurations/" + filename.Split('.')[0] + "/");
                     m_switcher.m_canvasToActivate = m_canvasToActivate;
                     m_switcher.m_canvasToDeactivate = m_canvasToDeactivate;
@@ -189,11 +192,12 @@ namespace SportsKinematics
                     GameObject.Find("Simulation/SimulationCanvas/CurrentPlaylistNameLabel").GetComponent<UI.CheckPlaylistLoad>().ChangeText(m_newPlaylist.Name);
                     PurgePlaylistBuilder();
                 }
+
             }
 
-            if(!Database.PlaylistExist(m_newPlaylist.Name))
+            if(!Server.Database.PlaylistExist(m_newPlaylist.Name))
             {
-                Database.AddPlaylist(m_newPlaylist.Name);
+                Server.Database.AddPlaylist(m_newPlaylist.Name);
             }
             foreach(Scenario s in m_newPlaylist.Scenarios)
             {

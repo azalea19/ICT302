@@ -251,6 +251,10 @@ namespace SportsKinematics
                 w.Flush();
                 w.Close();
             }
+
+            Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/Actions/" + mode + "/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/" + mode + "/", m_LogPath + ext);
+
+
         }
 
         /// <summary>
@@ -295,6 +299,7 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_pointPosition.Count != 0)
             {
                 Serial<List<Dictionary<JointType, float[]>>>.Save(m_pointPosition, m_LogPath + PlayerPrefs.GetString("PositionExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Position/");
+                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Position/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Position/", m_LogPath + PlayerPrefs.GetString("PositionExtension"));
             }
         }
 
@@ -307,7 +312,8 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_pointOrientation.Count != 0)
             {
                 Serial<List<Dictionary<JointType, float[]>>>.Save(m_pointOrientation, m_LogPath + PlayerPrefs.GetString("OrientationExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Orientation/");
-            }
+                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Orientation/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Orientation/", m_LogPath + PlayerPrefs.GetString("OrientationExtension"));
+            }            
         }
 
         /// <summary>
@@ -319,12 +325,13 @@ namespace SportsKinematics
             //check if we have frame data before making a folder for it
             if (m_LogPath != "" && m_frameData != null && m_frameData.Count != 0)
             {
-                 Directory.CreateDirectory(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/");
+                Directory.CreateDirectory(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/");
 
                 for (int i = 0; i < m_frameData.Count; i++)
                 {
                     TextureToFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/" + i + m_frameDataFileType, m_frameData[i]);
-                }
+                    Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/Images/" + m_LogPath + "/", i + m_frameDataFileType);
+                }               
             }
         }
 
@@ -337,6 +344,7 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_depthData != null && m_depthData.Count != 0)
             {
                 Serial<List<ushort[]>>.Save(m_depthData, m_LogPath + PlayerPrefs.GetString("DepthExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Depth/");
+                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Depth/", "../Users/ " + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Depth/", m_LogPath + PlayerPrefs.GetString("DepthExtension"));
             }
         }
 
