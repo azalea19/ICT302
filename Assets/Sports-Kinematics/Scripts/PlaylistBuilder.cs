@@ -190,6 +190,15 @@ namespace SportsKinematics
                     PurgePlaylistBuilder();
                 }
             }
+
+            if(!Database.PlaylistExist(m_newPlaylist.Name))
+            {
+                Database.AddPlaylist(m_newPlaylist.Name);
+            }
+            foreach(Scenario s in m_newPlaylist.Scenarios)
+            {
+                //Database.AddExpPlaylist()
+            }
         }
 
         /// <summary>

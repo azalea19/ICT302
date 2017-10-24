@@ -234,6 +234,36 @@ namespace SportsKinematics
             return s;
         }
 
+        public static bool PlaylistExist(string playlist)
+        {
+            bool s = false;
+            using (var client = new WebClient())
+            {
+                NameValueCollection parameters = new NameValueCollection();
+
+                parameters.Add("playlist", playlist);
+
+                try
+                {
+                    byte[] result = client.UploadValues(site + "scripts/PlaylistExist.php", "POST", parameters);
+
+                    if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length)) == 1)
+                    {
+                        s = true;
+                    }
+                    else if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length)) == 2)
+                    {
+                        s = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Server connection error.");
+                }
+            }
+
+            return s;
+        }
         public static bool UserExist(string username)
         {
             bool s = false;
