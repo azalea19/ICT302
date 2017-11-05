@@ -146,6 +146,9 @@ namespace SportsKinematics
 
             m_strikerObjectParent.transform.parent = jointTran;
             m_strikerObject.transform.parent = m_strikerObjectParent.transform;
+
+            GameObject.Find("PaddleParent").transform.parent = jointTran;
+            GameObject.Find("PaddleParent").transform.localPosition = new Vector3(-0.59f, 3.83f, 3.59f);
         }
 
         /// <summary>
