@@ -419,19 +419,23 @@ namespace SportsKinematics
                 InitObjects();
                 InitValues();
             }
-            m_action = action;
-            m_exp.FrameEnd = m_action.Count;
+            m_action = action;          
 
             // m_maxFrame = m_action.Count;
-            for (int i = 0; i < m_exp.m_occFrameMax.Length; i++)
+            if (m_isEditor)
             {
-                m_exp.m_occFrameMax[i] = m_maxFrame;
-                m_exp.m_occFrameMin[i] = m_maxFrame;
+                m_exp.FrameEnd = m_action.Count;
+                for (int i = 0; i < m_exp.m_occFrameMax.Length; i++)
+                {
+                    m_exp.m_occFrameMax[i] = m_maxFrame;
+                    m_exp.m_occFrameMin[i] = m_maxFrame;
+                }
             }
-
             m_exp.ReadConfig(m_isEditor, m_action.Name);
             if (!m_isEditor && dball != null)
             {
+                Debug.Log("action name: " + m_action.Name);
+                Debug.Log("ball occlusion: " + m_exp.m_occFrameMin[1]);
                 dball.m_destination = m_exp.m_ballDest;
                 dball.m_ballSpeed = m_exp.m_ballSpeed;
             }

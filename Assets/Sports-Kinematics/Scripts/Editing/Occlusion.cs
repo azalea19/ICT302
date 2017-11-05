@@ -32,12 +32,12 @@ namespace SportsKinematics
         public void Initialize()
         {
             m_skeletonChange = false;
-            
+
             m_activeJoint = (Material)Resources.Load("BoneActiveMaterial");
             m_inactiveJoint = (Material)Resources.Load("BoneInactiveMaterial");
             Debug.Log(m_activeJoint);
         }
-        
+
         public void Start(Experiment exp, GameObject body)
         {
             m_exp = exp;
@@ -54,30 +54,39 @@ namespace SportsKinematics
             Vector3 position = new Vector3();
             GameObject content = m_occlusionPanel.transform.GetChild(0).GetChild(0).gameObject;
             float yPos = content.transform.GetChild(Experiment.m_jointOffset - 1).position.y;
-            float yDif = content.transform.GetChild(Experiment.m_jointOffset - 2).position.y- content.transform.GetChild(Experiment.m_jointOffset - 1).position.y;
+            float yDif = content.transform.GetChild(Experiment.m_jointOffset - 2).position.y - content.transform.GetChild(Experiment.m_jointOffset - 1).position.y;
             content.transform.GetChild(0).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(0); });
             content.transform.GetChild(1).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(1); });
             content.transform.GetChild(2).GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(2); });
             for (int i = 0; i < body.transform.childCount; i++)
             {
-                GameObject option = GameObject.Instantiate(content.transform.GetChild(Experiment.m_jointOffset - 1).gameObject);
+                GameObject option = content.transform.GetChild(Experiment.m_jointOffset + i).gameObject;
                 option.name = body.transform.GetChild(i).name;
-                position = content.transform.GetChild(Experiment.m_jointOffset - 1).position;
-                Debug.Log(content.transform.GetChild(Experiment.m_jointOffset - 1).position.y);
-                yPos -= 30;
-                position.y = yPos;
-                option.transform.localPosition = position;
                 option.GetComponent<Toggle>().isOn = m_exp.m_occBoolArr[i + Experiment.m_jointOffset];
-                //otherwise delegate increments i in all Occlude functions, so th etemporary variable j needs to be created
                 int j = i;
                 option.GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(j + Experiment.m_jointOffset); });
-                option.transform.parent = content.transform;
-
-                option.transform.localScale = content.transform.GetChild(1).localScale;
-
                 option.transform.GetChild(1).GetComponent<Text>().text = body.transform.GetChild(i).name;
-
             }
+            //for (int i = 0; i < body.transform.childCount; i++)
+            //{
+            //    GameObject option = GameObject.Instantiate(content.transform.GetChild(Experiment.m_jointOffset - 1).gameObject);
+            //    option.name = body.transform.GetChild(i).name;
+            //    position = content.transform.GetChild(Experiment.m_jointOffset - 1).position;
+            //    Debug.Log(content.transform.GetChild(Experiment.m_jointOffset - 1).position.y);
+            //    yPos -= 30;
+            //    position.y = yPos;
+            //    option.transform.localPosition = position;
+            //    option.GetComponent<Toggle>().isOn = m_exp.m_occBoolArr[i + Experiment.m_jointOffset];
+            //    //otherwise delegate increments i in all Occlude functions, so th etemporary variable j needs to be created
+            //    int j = i;
+            //    option.GetComponent<Toggle>().onValueChanged.AddListener(delegate { Occlude(j + Experiment.m_jointOffset); });
+            //    option.transform.parent = content.transform;
+
+            //    option.transform.localScale = content.transform.GetChild(1).localScale;
+
+            //    option.transform.GetChild(1).GetComponent<Text>().text = body.transform.GetChild(i).name;
+
+            //}
         }
 
         /// <summary>

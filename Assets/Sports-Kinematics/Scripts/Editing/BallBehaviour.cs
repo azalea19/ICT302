@@ -91,8 +91,8 @@ namespace SportsKinematics
             // m_body.velocity = m_forceToApply;
             // m_body.useGravity = false;
 
-            Debug.Log("Impulse: " + imp + "  ");
-            DrawDebugLines(m_destination, Color.green);
+          //  Debug.Log("Impulse: " + imp + "  ");
+          //  DrawDebugLines(m_destination, Color.green);
         }
 
         private void DrawDebugLines(Vector3 targetVec, Color col)

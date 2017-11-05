@@ -108,47 +108,47 @@ namespace SportsKinematics
         /// <date>29/04/2017</date>
         public void CreateStriker(Transform jointTran, bool occ)//FR1 - Virtual opponent modelling from captured data.
         {
-            if (!m_strikerObject)
-            {
-                m_startTime = Time.time;
+            //if (!m_strikerObject)
+            //{
+            //    m_startTime = Time.time;
 
-                m_strikerObject = new GameObject("StrikerMesh");
-                m_strikerObjectParent = new GameObject("Striker");
+            //    m_strikerObject = new GameObject("StrikerMesh");
+            //    m_strikerObjectParent = new GameObject("Striker");
 
-                m_strikerObject.transform.position = jointTran.position;
+            //    m_strikerObject.transform.position = jointTran.position;
 
-                m_strikerObjectParent.transform.rotation = m_start;
+            //    m_strikerObjectParent.transform.rotation = m_start;
 
-                m_journeyLength = Quaternion.Angle(m_start, m_final);
+            //    m_journeyLength = Quaternion.Angle(m_start, m_final);
 
-                switch (m_StrikerSelection)
-                {
-                    case StrikerSelection.TableTennis:
-                        m_Renderer = m_strikerObject.AddComponent<MeshRenderer>();
-                        m_Filter = m_strikerObject.AddComponent<MeshFilter>();
-                        m_Filter.mesh = m_strikers[(int)m_StrikerSelection];
-                        m_Collider = m_strikerObject.AddComponent<MeshCollider>();
-                        m_strikerObject.GetComponent<MeshCollider>().sharedMesh = m_Filter.mesh;
-                        m_strikerObject.GetComponent<MeshCollider>().skinWidth = 2f;
-                        m_Renderer.material = m_strikerMaterials[(int)m_StrikerSelection];
-                        m_collision = m_strikerObject.AddComponent<StrikerCollision>();
-                        break;
-                    case StrikerSelection.Catch:
-                        m_Collider = m_strikerObject.AddComponent<SphereCollider>();
-                        break;
-                }
+            //    switch (m_StrikerSelection)
+            //    {
+            //        case StrikerSelection.TableTennis:
+            //            m_Renderer = m_strikerObject.AddComponent<MeshRenderer>();
+            //            m_Filter = m_strikerObject.AddComponent<MeshFilter>();
+            //            m_Filter.mesh = m_strikers[(int)m_StrikerSelection];
+            //            m_Collider = m_strikerObject.AddComponent<MeshCollider>();
+            //            m_strikerObject.GetComponent<MeshCollider>().sharedMesh = m_Filter.mesh;
+            //            m_strikerObject.GetComponent<MeshCollider>().skinWidth = 2f;
+            //            m_Renderer.material = m_strikerMaterials[(int)m_StrikerSelection];
+            //            m_collision = m_strikerObject.AddComponent<StrikerCollision>();
+            //            break;
+            //        case StrikerSelection.Catch:
+            //            m_Collider = m_strikerObject.AddComponent<SphereCollider>();
+            //            break;
+            //    }
                 
-                if (!occ)
-                {
-                    m_strikerObject.layer = LayerMask.NameToLayer("Occluded");
-                }
-            }
+            //    if (!occ)
+            //    {
+            //        m_strikerObject.layer = LayerMask.NameToLayer("Occluded");
+            //    }
+            //}
 
-            m_strikerObjectParent.transform.parent = jointTran;
-            m_strikerObject.transform.parent = m_strikerObjectParent.transform;
+            //m_strikerObjectParent.transform.parent = jointTran;
+            //m_strikerObject.transform.parent = m_strikerObjectParent.transform;
 
             GameObject.Find("PaddleParent").transform.parent = jointTran;
-            GameObject.Find("PaddleParent").transform.localPosition = new Vector3(-0.59f, 3.83f, 3.59f);
+            GameObject.Find("PaddleParent").transform.localPosition = new Vector3(-0.59f, 3.83f, 3.59f);//(0.04f,8.36f,1.76f);//
         }
 
         /// <summary>

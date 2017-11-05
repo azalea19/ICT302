@@ -100,8 +100,13 @@ namespace SportsKinematics
         /// <date>25/03/2017</date>
         void Start()
         {
-            m_KinectFacade = kinectFacade.GetComponent<CaptureFacade>();
+            if (kinectFacade != null)
+            {
+                m_KinectFacade = kinectFacade.GetComponent<CaptureFacade>();
+            }else
+            {
 
+            }
             m_pointPosition = new List<Dictionary<JointType, float[]>>();
             m_pointOrientation = new List<Dictionary<JointType, float[]>>();
             m_frameData = new List<Texture2D>();
@@ -118,7 +123,7 @@ namespace SportsKinematics
         /// <date>25/03/2017</date>
         void Update()
         {
-            if (m_KinectFacade.ColourView.ColourManager.GetKinect().IsAvailable)
+            if (m_KinectFacade != null && m_KinectFacade.ColourView.ColourManager.GetKinect() != null && m_KinectFacade.ColourView.ColourManager.GetKinect().IsAvailable)
             {
                 if (m_logData && (m_frameCount != 0 || m_pointPosition.Count > 0))//FR5 - Data logging facilities.
                 {
