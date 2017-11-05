@@ -321,6 +321,8 @@ namespace SportsKinematics
             {
                 if (m_exp.FrameBall -2 == m_renderFrame)
                 {
+                    //dball.UpdateDestination();
+                    Debug.Log("ball frame: " + m_exp.FrameBall);
                     dball.ApplyImpulse();
                 }
                 UpdateBody();
@@ -329,13 +331,8 @@ namespace SportsKinematics
                 {
                     m_renderFrame += (int)m_exp.m_speed / physFPS;
                 }
-                if (m_ball)
-                {
-                    if (m_timer >= m_releaseTime - m_ball.GetComponent<BallScript>().TimeOfCollide)
-                    {
-                        m_ball.GetComponent<BallScript>().m_triggerBall = true;
-                    }
-                }
+                OccludeObject(dball.gameObject, 1);
+                OccludeObject(GameObject.Find("PaddleParent").transform.GetChild(0).gameObject, 0);           
 
             }
             else
@@ -347,6 +344,24 @@ namespace SportsKinematics
             {
                 Debug.Log("Occlude");
                 OccludeAllJoints(false);
+            }
+        }
+
+        private void OccludeObject(GameObject go, int index)
+        {
+            if (go)
+            {
+
+                if ((m_exp.m_occFrameMin[index] >= m_renderFrame && m_exp.m_occFrameMax[index] >= m_renderFrame)
+                            || (m_exp.m_occFrameMin[index] <= m_renderFrame && m_exp.m_occFrameMax[index] <= m_renderFrame))
+
+                {
+                    go.layer = LayerMask.NameToLayer("Default");
+                }
+                else
+                {
+                    go.layer = LayerMask.NameToLayer("Occluded");
+                }
             }
         }
 
@@ -415,17 +430,23 @@ namespace SportsKinematics
             }
 
             m_exp.ReadConfig(m_isEditor, m_action.Name);
+            if (!m_isEditor && dball != null)
+            {
+                dball.m_destination = m_exp.m_ballDest;
+                dball.m_ballSpeed = m_exp.m_ballSpeed;
+            }
+
             if (m_trackedBody == null)
             {
 
                 try
                 {
                     m_trackedBody = RenderBody();
-                    if (m_ball)
-                    {
-                        //Determine ball target
-                        DetermineBallTarget(m_trackedBody);
-                    }
+                    //if (m_ball)
+                    //{
+                    //    //Determine ball target
+                    //    DetermineBallTarget(m_trackedBody);
+                    //}
                 }
                 catch
                 {
@@ -479,8 +500,11 @@ namespace SportsKinematics
             RefreshBody(body);
             Debug.Log("fsd4");
             RefreshBody(body);  //fixes a transform issue
-
-            m_occ.Start(m_exp, body);
+            Debug.Log("fsd4.5");
+            if (m_occ != null)
+                m_occ.Start(m_exp, body);
+            else
+                m_occ = new Occlusion();
             Debug.Log("fsd5");
             if (m_isEditor)
                 m_occ.AddSkeletonOcclusionOptions(body);
@@ -991,7 +1015,7 @@ namespace SportsKinematics
             if (m_ball && m_renderFrame != 0)
             {
                 //Determine ball target
-                DetermineBallTarget(m_trackedBody);
+              //  DetermineBallTarget(m_trackedBody);
             }
 
 
@@ -1002,13 +1026,15 @@ namespace SportsKinematics
         /// </summary>
         public void SaveData()
         {
+            m_exp.m_ballSpeed = dball.m_ballSpeed;
+            m_exp.m_ballDest = dball.m_destination;
             List<Dictionary<Kinect.JointType, float[]>> newActionPositionData = new List<Dictionary<Kinect.JointType, float[]>>();
             List<Dictionary<Kinect.JointType, float[]>> newActionOrientationData = new List<Dictionary<Kinect.JointType, float[]>>();
 
             //Changed by Olesia Kochergina: for (int i = 0; i < m_action.CurrentActionPositionData.Count; i++)
-            for (int i = 0; i < m_exp.FrameEnd; i++)
+            for (int i = m_exp.FrameStart; i < m_exp.FrameEnd; i++)
             {
-                if (m_renderFrame <= i)
+               // if (m_renderFrame <= i)
                 {
                     newActionPositionData.Add(m_action.CurrentActionPositionData[i]);
                     newActionOrientationData.Add(m_action.CurrentActionOrientationData[i]);
