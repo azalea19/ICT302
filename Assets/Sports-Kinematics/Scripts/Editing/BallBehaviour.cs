@@ -13,7 +13,7 @@ namespace SportsKinematics
         public Rigidbody m_body;
         private float m_mass;
         public float m_boost = 200.0f;
-        private float m_ballSpeed = 100;
+        public float m_ballSpeed = 100;
         private GameObject debugger;
         // Use this for initialization
         void Start()
@@ -47,7 +47,7 @@ namespace SportsKinematics
         public void UpdateDestination()
         {
 
-            m_destination = GameObject.Find("PadParent").transform.position;
+            m_destination = GameObject.Find("PaddleParent").transform.position;
         }
 
         public void UpdateSpeed()
@@ -64,7 +64,7 @@ namespace SportsKinematics
             Reset();
             Vector3 direction = m_destination - transform.position;
             Debug.Log("ball speed" + m_ballSpeed);
-            transform.position = m_destination + GameObject.Find("PadParent").transform.forward;
+            transform.position = m_destination + GameObject.Find("PaddleParent").transform.forward;
             float m_speed = Vector3.Distance(m_destination, transform.position) / 0.05f;
             m_speed /= (1.0f / (m_ballSpeed/100));
             Vector3 m_forceToApply = m_mass * m_speed * direction.normalized;

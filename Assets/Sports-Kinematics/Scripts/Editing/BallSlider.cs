@@ -22,7 +22,7 @@ namespace SportsKinematics
 
         public void BallPlacement()
         {
-            m_renderer.m_exp.FrameBall = (int)m_slider.value + m_renderer.m_exp.FrameStart ;
+            m_renderer.m_exp.FrameBall = (int)m_slider.value + m_renderer.m_exp.FrameStart;
             m_renderer.RenderFrame = m_renderer.m_exp.FrameBall;
             m_renderer.UpdateBody();
             m_text.text = (m_renderer.m_exp.FrameBall - m_renderer.m_exp.FrameStart).ToString();

@@ -32,8 +32,8 @@ namespace SportsKinematics.UI
         /// </summary>
         public void TaskOnClick()
         {
-            if (ball)
-                m_ball.ResetBall();
+            //if (ball)
+            //    m_ball.ResetBall();
             m_actionRenderer.ResetRenderFrame();
         }
     }
