@@ -85,7 +85,8 @@ namespace SportsKinematics
         /// <returns>Specific users data</returns>
         public User Load(string username)
         {
-            m_myUser = Serial<User>.Load(username + ".shri", Application.dataPath + "/../Users/" + username + "/");
+            m_myUser = Server.Database.SelectUser(username);
+            //m_myUser = Serial<User>.Load(username + ".shri", Application.dataPath + "/../Users/" + username + "/");
 
             m_myUser.Username = Encryption.XOR(m_myUser.Username);
             m_myUser.Password = Encryption.XOR(m_myUser.Password);

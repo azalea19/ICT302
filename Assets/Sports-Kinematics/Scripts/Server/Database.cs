@@ -264,6 +264,7 @@ namespace SportsKinematics.Server
 
             return s;
         }
+
         public static bool UserExist(string username)
         {
             bool s = false;
