@@ -8,6 +8,7 @@ namespace SportsKinematics
 {
     public class ActionRenderer : MonoBehaviour
     {
+        public GameObject opp_placeholder;
         /// <summary>
         /// The fps of the fixed update
         /// </summary>
@@ -316,23 +317,23 @@ namespace SportsKinematics
         void FixedUpdate()
         {
             m_reachedEnd = false;
-            
+
             if (m_play && m_exp.m_speed != 0.0f && !m_reachedEnd)
             {
-                if (m_exp.FrameBall -2 == m_renderFrame)
+                if (m_exp.FrameBall - 2 == m_renderFrame)
                 {
                     //dball.UpdateDestination();
-                    Debug.Log("ball frame: " + m_exp.FrameBall);
+                    // Debug.Log("ball frame: " + m_exp.FrameBall);
                     dball.ApplyImpulse();
                 }
                 UpdateBody();
-                
+
                 if (m_renderFrame < m_maxFrame - 3)
                 {
                     m_renderFrame += (int)m_exp.m_speed / physFPS;
                 }
                 OccludeObject(dball.gameObject, 1);
-                OccludeObject(GameObject.Find("PaddleParent").transform.GetChild(0).gameObject, 0);           
+                OccludeObject(GameObject.Find("PaddleParent").transform.GetChild(0).gameObject, 0);
 
             }
             else
@@ -354,7 +355,6 @@ namespace SportsKinematics
 
                 if ((m_exp.m_occFrameMin[index] >= m_renderFrame && m_exp.m_occFrameMax[index] >= m_renderFrame)
                             || (m_exp.m_occFrameMin[index] <= m_renderFrame && m_exp.m_occFrameMax[index] <= m_renderFrame))
-
                 {
                     go.layer = LayerMask.NameToLayer("Default");
                 }
@@ -378,19 +378,20 @@ namespace SportsKinematics
                 try
                 {
                     RefreshBody(m_trackedBody);
-                    if (m_ball)
-                    {
-                        if ((m_exp.m_occFrameMin[1] >= m_renderFrame && m_exp.m_occFrameMax[1] >= m_renderFrame)
-                             || (m_exp.m_occFrameMin[1] <= m_renderFrame && m_exp.m_occFrameMax[1] <= m_renderFrame))
+                    OccludeObject(m_ball, 1);
+                    //if (m_ball)
+                    //{
+                    //    if ((m_exp.m_occFrameMin[1] >= m_renderFrame && m_exp.m_occFrameMax[1] >= m_renderFrame)
+                    //         || (m_exp.m_occFrameMin[1] <= m_renderFrame && m_exp.m_occFrameMax[1] <= m_renderFrame))
 
-                        {
-                            m_ball.layer = LayerMask.NameToLayer("Default");
-                        }
-                        else
-                        {
-                            m_ball.layer = LayerMask.NameToLayer("Occluded");
-                        }
-                    }
+                    //    {
+                    //        m_ball.layer = LayerMask.NameToLayer("Default");
+                    //    }
+                    //    else
+                    //    {
+                    //        m_ball.layer = LayerMask.NameToLayer("Occluded");
+                    //    }
+                    //}
 
                 }
                 catch
@@ -413,13 +414,13 @@ namespace SportsKinematics
         {
             m_exp = new Experiment();
             m_exp.Start();
-           
+
             if (!m_captureFacade)
             {
                 InitObjects();
                 InitValues();
             }
-            m_action = action;          
+            m_action = action;
 
             // m_maxFrame = m_action.Count;
             if (m_isEditor)
@@ -434,8 +435,8 @@ namespace SportsKinematics
             m_exp.ReadConfig(m_isEditor, m_action.Name);
             if (!m_isEditor && dball != null)
             {
-                Debug.Log("action name: " + m_action.Name);
-                Debug.Log("ball occlusion: " + m_exp.m_occFrameMin[1]);
+                //Debug.Log("action name: " + m_action.Name);
+                //Debug.Log("ball occlusion: " + m_exp.m_occFrameMin[11]);
                 dball.m_destination = m_exp.m_ballDest;
                 dball.m_ballSpeed = m_exp.m_ballSpeed;
             }
@@ -492,30 +493,31 @@ namespace SportsKinematics
         private GameObject RenderBody()
         {
             GameObject body = new GameObject("Opponent");
-
             body.transform.position = new Vector3(-8f, 3.2f, 12);
             body.transform.rotation = new Quaternion(0f, 180f, 0f, 1f);
             body.transform.localScale = new Vector3(-1f, 1f, 1f);
 
-            Debug.Log("fsd2");
+            // Debug.Log("fsd2");
             RenderJoints(body);
-            Debug.Log("fsd3");
+            //Debug.Log("fsd3");
 
             RefreshBody(body);
-            Debug.Log("fsd4");
+            //Debug.Log("fsd4");
             RefreshBody(body);  //fixes a transform issue
-            Debug.Log("fsd4.5");
+            //Debug.Log("fsd4.5");
             if (m_occ != null)
                 m_occ.Start(m_exp, body);
             else
                 m_occ = new Occlusion();
-            Debug.Log("fsd5");
             if (m_isEditor)
                 m_occ.AddSkeletonOcclusionOptions(body);
             //fix for simulation
             m_trackedBody = body;
-            Debug.Log("fs3d");
+            Debug.Log("Completed Body Init");
             ResetRenderFrame();
+
+            if (opp_placeholder)
+                body.transform.parent = opp_placeholder.transform;
             return body;
         }
 
@@ -602,7 +604,7 @@ namespace SportsKinematics
                 int i = 0;
                 for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
                 {
-                    
+
                     //Modified by Olesia Kochergina - faster approach
                     Transform jointTran = body.transform.GetChild(i); //.FindChild(jt.ToString());
                     i++;
@@ -615,7 +617,6 @@ namespace SportsKinematics
                     {
                         if ((m_exp.m_occFrameMin[(int)jt + Experiment.m_jointOffset] >= m_renderFrame && m_exp.m_occFrameMax[(int)jt + Experiment.m_jointOffset] >= m_renderFrame)
                             || (m_exp.m_occFrameMin[(int)jt + Experiment.m_jointOffset] <= m_renderFrame && m_exp.m_occFrameMax[(int)jt + Experiment.m_jointOffset] <= m_renderFrame))
-
                         {
                             GameObject.Find("Opponent/" + jt.ToString()).layer = LayerMask.NameToLayer("Default");
                         }
@@ -643,7 +644,7 @@ namespace SportsKinematics
 
                         }
                     }
-                    
+
                     //Draw Striker on hand joint
                     if (jt == Kinect.JointType.HandRight && m_HandRight)
                     {
@@ -655,7 +656,7 @@ namespace SportsKinematics
                     }
 
                     RefreshBodyLines(body, actionPositionData, jointTran, jt);
-                    
+
                 }
             }
             else
@@ -996,7 +997,7 @@ namespace SportsKinematics
             //}
             //else
             //    m_speedCounter++;
-            m_timer =m_renderFrame /m_exp.m_speed;
+            m_timer = m_renderFrame / m_exp.m_speed;
         }
 
         /// <summary>
@@ -1019,7 +1020,7 @@ namespace SportsKinematics
             if (m_ball && m_renderFrame != 0)
             {
                 //Determine ball target
-              //  DetermineBallTarget(m_trackedBody);
+                //  DetermineBallTarget(m_trackedBody);
             }
 
 
@@ -1038,7 +1039,7 @@ namespace SportsKinematics
             //Changed by Olesia Kochergina: for (int i = 0; i < m_action.CurrentActionPositionData.Count; i++)
             for (int i = m_exp.FrameStart; i < m_exp.FrameEnd; i++)
             {
-               // if (m_renderFrame <= i)
+                // if (m_renderFrame <= i)
                 {
                     newActionPositionData.Add(m_action.CurrentActionPositionData[i]);
                     newActionOrientationData.Add(m_action.CurrentActionOrientationData[i]);
