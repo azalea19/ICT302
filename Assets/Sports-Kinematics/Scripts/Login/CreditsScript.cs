@@ -28,8 +28,8 @@ public class CreditsScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        m_rolesGO = gameObject.transform.FindChild("Roles").gameObject;
-        m_contrGO = gameObject.transform.FindChild("Contributors").gameObject;
+        m_rolesGO = gameObject.transform.Find("Roles").gameObject;
+        m_contrGO = gameObject.transform.Find("Contributors").gameObject;
 
         m_credits = new Dictionary<string, string[]>();
         AddRoles();

@@ -684,9 +684,9 @@ namespace SportsKinematics
 
                 actionPositionData.TryGetValue(target, out jointEnd);
 
-                Transform targetJointTran = body.transform.FindChild(target.ToString());
+                Transform targetJointTran = body.transform.Find(target.ToString());
 
-                if (m_drawLines && body.transform.FindChild(jt.ToString()).GetComponent<LineRenderer>())
+                if (m_drawLines && body.transform.Find(jt.ToString()).GetComponent<LineRenderer>())
                 {
                     RefreshLineRender(body, jointTran.position, targetJointTran.position, jt);
                 }
@@ -721,9 +721,9 @@ namespace SportsKinematics
         /// <param name="jt">joint being refreshed as JointType</param>
         private void RefreshLineRender(GameObject obj, Vector3 jointStart, Vector3 jointEnd, Kinect.JointType jt)
         {
-            obj.transform.FindChild(jt.ToString()).GetComponent<LineRenderer>().enabled = true;
+            obj.transform.Find(jt.ToString()).GetComponent<LineRenderer>().enabled = true;
             Vector3[] arr = { jointStart, jointEnd };
-            obj.transform.FindChild(jt.ToString()).GetComponent<LineRenderer>().SetPositions(arr);
+            obj.transform.Find(jt.ToString()).GetComponent<LineRenderer>().SetPositions(arr);
         }
 
         /// <summary>
@@ -735,7 +735,7 @@ namespace SportsKinematics
         {
             if (!m_drawLines && GameObject.Find("Opponent/" + jt.ToString()).GetComponent<LineRenderer>() != null)
             {
-                obj.transform.FindChild(jt.ToString()).GetComponent<LineRenderer>().enabled = false;
+                obj.transform.Find(jt.ToString()).GetComponent<LineRenderer>().enabled = false;
             }
         }
 
@@ -950,14 +950,14 @@ namespace SportsKinematics
                 jt = Kinect.JointType.HandRight;
                 targetBodyPosition.TryGetValue(jt, out targetPosition);
                 targetBodyOrientation.TryGetValue(jt, out targetOrientation);
-                hand = body.transform.FindChild("HandRight");
+                hand = body.transform.Find("HandRight");
             }
             else
             {
                 jt = Kinect.JointType.HandLeft;
                 targetBodyPosition.TryGetValue(jt, out targetPosition);
                 targetBodyOrientation.TryGetValue(jt, out targetOrientation);
-                hand = body.transform.FindChild("HandLeft");
+                hand = body.transform.Find("HandLeft");
             }
 
             float[] tempTargetPositon = new float[3];

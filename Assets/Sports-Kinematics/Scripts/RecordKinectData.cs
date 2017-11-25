@@ -256,6 +256,8 @@ namespace SportsKinematics
                 w.Flush();
                 w.Close();
             }
+
+            Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/Actions/" + mode + "/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/" + mode + "/", m_LogPath + ext);
         }
 
         /// <summary>
