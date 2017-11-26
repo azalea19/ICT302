@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-
+using System.Collections;
 namespace SportsKinematics.UI
 {
     /// <summary>
@@ -52,10 +52,65 @@ namespace SportsKinematics.UI
         /// <summary>
         /// Load level that has been selected
         /// </summary>
-        public void LoadLevel()
+        public void LoadLevel(GameObject Popup = null)
         {
-            SceneManager.LoadSceneAsync(m_level);
+            if (m_level != "Record" && m_level != "Simulation" || !Popup)
+                SceneManager.LoadSceneAsync(m_level);
+            else
+            {
+                StartCoroutine("Wait", Popup);
+            }
         }
+
+        /// <summary>
+        /// Allows to run the script twice after one frame has passed to verify the status of the hardware after one second.
+        /// If the hardware is still not available an error will pop up to notify the user.
+        /// </summary>
+        /// <param name="Popup">Reference to a game object which holds an error popup.</param>
+        /// <returns></returns>
+        public IEnumerator Wait(GameObject Popup)
+        {
+            if (m_level == "Record")
+            {
+                if (!RecordKinectData.isConnected())
+                {
+                    yield return new WaitForSeconds(1.0f);
+                    //check again
+                    if (!RecordKinectData.isConnected())
+                    {
+                        Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Kinect V2 is not available.";
+                        m_canvas = "MainMenuCanvas";
+                        CreatePopup(Popup);
+                        m_Popup.SetActive(true);
+                    }
+                    else
+                    {
+                        SceneManager.LoadSceneAsync(m_level);
+                    }
+                }
+                else
+                {
+                    SceneManager.LoadSceneAsync(m_level);
+                }
+            }
+            else if (m_level == "Simulation")
+            {
+                string model = UnityEngine.VR.VRDevice.model;
+                if (model == null || !model.Contains("Vive"))
+                {
+                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! HTC Vive is not available.";
+                    m_canvas = "SimulationCanvas";
+                    CreatePopup(Popup);
+                    m_Popup.SetActive(true);
+                }
+                else
+                {
+                    SceneManager.LoadSceneAsync(m_level);
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// Delete Player Pref key at [field]
@@ -90,8 +145,8 @@ namespace SportsKinematics.UI
         private void CreatePopup(GameObject popup)
         {
             m_func = NoFunc;
-
-            GameObject.Find(m_canvas).GetComponent<CanvasGroup>().blocksRaycasts = false;
+            if (m_canvas != null && GameObject.Find(m_canvas).GetComponent<CanvasGroup>() != null)
+                GameObject.Find(m_canvas).GetComponent<CanvasGroup>().blocksRaycasts = false;
 
             m_Popup = Instantiate(popup) as GameObject;
             Button b = GetComponent<Button>();
@@ -106,8 +161,8 @@ namespace SportsKinematics.UI
         public void DestroyPopup(Popup.DialogResults result)
         {
             Destroy(m_Popup);
-
-            GameObject.Find(m_canvas).GetComponent<CanvasGroup>().blocksRaycasts = true;
+            if (m_canvas != null)
+                GameObject.Find(m_canvas).GetComponent<CanvasGroup>().blocksRaycasts = true;
 
             if (result == Popup.DialogResults.Yes)
             {
@@ -292,10 +347,10 @@ namespace SportsKinematics.UI
         /// <returns>randomly generated password</returns>
         private string GeneratePassword()
         {
-            string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             string new_password = "";
 
-            for(int i=0;i<8;i++)
+            for (int i = 0; i < 8; i++)
             {
                 new_password += chars[UnityEngine.Random.Range(0, chars.Length)];
             }
@@ -362,7 +417,7 @@ namespace SportsKinematics.UI
             {
                 //if (!(File.Exists(path + "/../Users/" + user + "/" + user + ".shri")))
                 if (!Server.Database.UserExist(user))
-                    {
+                {
                     t_folders = new Thread(() => CreateSubDirectories(path, user));
                     if (!t_folders.IsAlive)
                         t_folders.Start();
@@ -370,8 +425,9 @@ namespace SportsKinematics.UI
                     User u = new User(user, email, pass);
 
                     GameObject.Find("UserManager").GetComponent<UserManager>().Save(u);
-
+                    Debug.Log("a");
                     Login(u);
+                    Debug.Log("b");
                 }
                 else
                 {
@@ -420,21 +476,21 @@ namespace SportsKinematics.UI
 
             string path = Application.dataPath;
 
-            string fn = Application.dataPath + "/../Users/" + username + "/" + username + ".shri";
+            //string fn = Application.dataPath + "/../Users/" + username + "/" + username + ".shri";
 
             bool remember = GameObject.Find(m_canvas + "RememberToggle").GetComponent<Toggle>().isOn;
 
             bool userValid = Valid(username);
             bool passValid = Valid(pass);
-            
+
             if (userValid && passValid)
             {
                 //if (File.Exists(fn))
-                if(Server.Database.UserExist(username))
+                if (Server.Database.UserExist(username))
                 {
                     //User user = GameObject.Find("UserManager").GetComponent<UserManager>().Load(username);
                     User user = Server.Database.SelectUser(username);
-                    
+
                     if (Match(pass.GetHashCode().ToString(), user.Password))
                     {
                         t_folders = new Thread(() => CreateSubDirectories(path, username));
@@ -457,12 +513,12 @@ namespace SportsKinematics.UI
                         Login(user);
                     }
                     else
-                        if(!Match(pass, user.Password))
-                        {
-                            Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
-                            CreatePopup(Popup);
-                            passInp.text = "";
-                        }
+                        if (!Match(pass, user.Password))
+                    {
+                        Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Password incorrect!";
+                        CreatePopup(Popup);
+                        passInp.text = "";
+                    }
                 }
                 else
                 {
@@ -513,7 +569,7 @@ namespace SportsKinematics.UI
             string u_newPassword = GeneratePassword();
 
             string user = GameObject.Find(m_canvas + "Email address/EmailField").GetComponent<InputField>().text.ToLower();
-            print("User: " + user + " New password: " + u_newPassword);
+            //print("User: " + user + " New password: " + u_newPassword);
 
             bool valid = Valid(user);
 
@@ -531,17 +587,6 @@ namespace SportsKinematics.UI
                 return;
             }
 
-            //string fn = Application.dataPath + "/../Users/" + user + "/" + user + ".shri";
-            //string recipient = user;
-            //string senderEmail = "creative.solutions.murdoch@outlook.com";//sports.kinematics.murdoch@gmail.com";
-            //string pass = "kinetic2017S2";
-            //string senderName = "[NO REPLY] Kinematic Research Solutions";
-            //string host = "smtp.live.com";//"smtp.gmail.com";
-            //string subject = "Automated Email - Forgotten Password";
-            //
-            //string body = "A Point Light user tried to use our \"Forgotten Password\" feature with your email address.\n" +
-            //              "As we could not find your email address in our system, this could not be completed.\n" +
-            //              "Thank you for your patience.";
 
             mail.From = new MailAddress("creative.solutions.murdoch@outlook.com");
             mail.Body = "A Point Light user tried to use our \"Forgotten Password\" feature with your email address.\n" +
@@ -565,8 +610,7 @@ namespace SportsKinematics.UI
 
                 mail.To.Add(u.Email);
 
-                int p = Server.Database.UpdateUser(u.Username,u.Email, u_newPassword);
-                //print("alnsdckjndsc:" + recipient + " update:" + p);
+                int p = Server.Database.UpdateUser(u.Username, u.Email, u_newPassword);
             }
 
             //EmailDetails em = new EmailDetails(recipient, senderEmail, pass, senderName, host);
@@ -621,7 +665,7 @@ namespace SportsKinematics.UI
 
             User u = userManager.GetComponent<UserManager>().MyUser;
 
-            if (Valid(pass)) 
+            if (Valid(pass))
             {
                 u.Password = pass;
             }
@@ -645,14 +689,14 @@ namespace SportsKinematics.UI
             {
                 PlayerPrefs.SetInt("RecPopup", 1);
             }
-           
+
             PlayerPrefs.SetInt("EditPopup", 0);
-        
+
             if (editPopup)
             {
                 PlayerPrefs.SetInt("EditPopup", 1);
             }
-            
+
             PlayerPrefs.SetInt("SimPopup", 0);
 
             if (simPopup)

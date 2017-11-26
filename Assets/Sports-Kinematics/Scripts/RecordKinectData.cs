@@ -100,14 +100,40 @@ namespace SportsKinematics
         /// <date>25/03/2017</date>
         void Start()
         {
-            m_KinectFacade = kinectFacade.GetComponent<CaptureFacade>();
+            if (kinectFacade != null)
+            {
+                m_KinectFacade = kinectFacade.GetComponent<CaptureFacade>();
+            }else
+            {
 
+            }
             m_pointPosition = new List<Dictionary<JointType, float[]>>();
             m_pointOrientation = new List<Dictionary<JointType, float[]>>();
             m_frameData = new List<Texture2D>();
             m_depthData = new List<ushort[]>();
         }
 
+        public static bool isConnected()
+        {
+            KinectSensor device = KinectSensor.GetDefault();
+            
+            
+            if (device != null)
+            {
+                if (!device.IsOpen)
+                {
+                    device.Open();
+                }
+                if (device.IsAvailable)
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool isActive()
+        {
+            return (isConnected() && KinectSensor.GetDefault().IsOpen);
+        }
         /// <summary>
         /// Updates the stringbuilder containing the kinect data if
         /// in store mode, otherwise will save data if in saved mode
@@ -118,7 +144,7 @@ namespace SportsKinematics
         /// <date>25/03/2017</date>
         void Update()
         {
-            if (m_KinectFacade.ColourView.ColourManager.GetKinect().IsAvailable)
+            if (m_KinectFacade != null && m_KinectFacade.ColourView.ColourManager.GetKinect() != null && m_KinectFacade.ColourView.ColourManager.GetKinect().IsAvailable)
             {
                 if (m_logData && (m_frameCount != 0 || m_pointPosition.Count > 0))//FR5 - Data logging facilities.
                 {
@@ -253,8 +279,6 @@ namespace SportsKinematics
             }
 
             Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/Actions/" + mode + "/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/" + mode + "/", m_LogPath + ext);
-
-
         }
 
         /// <summary>
@@ -299,7 +323,6 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_pointPosition.Count != 0)
             {
                 Serial<List<Dictionary<JointType, float[]>>>.Save(m_pointPosition, m_LogPath + PlayerPrefs.GetString("PositionExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Position/");
-                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Position/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Position/", m_LogPath + PlayerPrefs.GetString("PositionExtension"));
             }
         }
 
@@ -312,8 +335,7 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_pointOrientation.Count != 0)
             {
                 Serial<List<Dictionary<JointType, float[]>>>.Save(m_pointOrientation, m_LogPath + PlayerPrefs.GetString("OrientationExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Orientation/");
-                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Orientation/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Orientation/", m_LogPath + PlayerPrefs.GetString("OrientationExtension"));
-            }            
+            }
         }
 
         /// <summary>
@@ -325,13 +347,12 @@ namespace SportsKinematics
             //check if we have frame data before making a folder for it
             if (m_LogPath != "" && m_frameData != null && m_frameData.Count != 0)
             {
-                Directory.CreateDirectory(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/");
+                 Directory.CreateDirectory(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/");
 
                 for (int i = 0; i < m_frameData.Count; i++)
                 {
                     TextureToFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/" + i + m_frameDataFileType, m_frameData[i]);
-                    Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/Images/" + m_LogPath + "/", "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/Images/" + m_LogPath + "/", i + m_frameDataFileType);
-                }               
+                }
             }
         }
 
@@ -344,7 +365,6 @@ namespace SportsKinematics
             if (m_LogPath != "" && m_depthData != null && m_depthData.Count != 0)
             {
                 Serial<List<ushort[]>>.Save(m_depthData, m_LogPath + PlayerPrefs.GetString("DepthExtension"), PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Depth/");
-                Server.Files.UploadFile(PlayerPrefs.GetString("CurrentUserDataPath") + "/ActionData/" + mode + "/Depth/", "../Users/ " + PlayerPrefs.GetString("CurrentUsername") + "/ActionData/" + mode + "/Depth/", m_LogPath + PlayerPrefs.GetString("DepthExtension"));
             }
         }
 

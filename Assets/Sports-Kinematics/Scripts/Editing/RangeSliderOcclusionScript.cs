@@ -23,20 +23,20 @@ namespace SportsKinematics.UI
             {
                 // m_actionRenderer.FrameMax = (int)m_slider.upperValue;
                 m_prevUpperValue = (int)m_slider.upperValue;
-                for (int i = 0; i < m_actionRenderer.m_occBoolArr.Length; i++)
+                for (int i = 0; i < m_actionRenderer.m_exp.m_occBoolArr.Length; i++)
                 {
-                    if (m_actionRenderer.m_occBoolArr[i])
-                        m_actionRenderer.m_occFrameMax[i] = (int)m_slider.upperValue;
+                    if (m_actionRenderer.m_exp.m_occBoolArr[i])
+                        m_actionRenderer.m_exp.m_occFrameMax[i] = (int)m_slider.upperValue + m_actionRenderer.m_exp.FrameStart;
                 }
             }
 
-            if (m_prevLowerValue != (int)m_slider.lowerValue && m_actionRenderer.RenderFrame != (int)m_slider.lowerValue)
+            if (m_prevLowerValue != (int)m_slider.lowerValue && CorrectedFrameStart() != (int)m_slider.lowerValue)
             {
                 //m_actionRenderer.RenderFrame = (int)m_slider.lowerValue;
-                for (int i = 0; i < m_actionRenderer.m_occBoolArr.Length; i++)
+                for (int i = 0; i < m_actionRenderer.m_exp.m_occBoolArr.Length; i++)
                 {
-                    if (m_actionRenderer.m_occBoolArr[i])
-                        m_actionRenderer.m_occFrameMin[i] = (int)m_slider.lowerValue;
+                    if (m_actionRenderer.m_exp.m_occBoolArr[i])
+                        m_actionRenderer.m_exp.m_occFrameMin[i] = (int)m_slider.lowerValue + m_actionRenderer.m_exp.FrameStart ;
                 }
                 m_actionRenderer.UpdateBody();
                 m_prevLowerValue = (int)m_slider.lowerValue;

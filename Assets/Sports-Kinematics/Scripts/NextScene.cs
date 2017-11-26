@@ -38,6 +38,9 @@ namespace SportsKinematics.UI
             {
                 m_text.text = "Send Report";
                 m_finalSceneBool = true;
+            }else
+            {
+                //Debug.Log("pLAYLIST: "+GameObject.Find("SimulationManager").GetComponent<SimulationManager>().GetPlaylistCount());
             }
         }
 

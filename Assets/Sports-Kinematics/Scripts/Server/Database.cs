@@ -2,13 +2,16 @@
 using System.Net;
 using System.Collections.Specialized;
 using System.IO;
+using UnityEngine;
+using System.Net.Security;
 
 namespace SportsKinematics.Server
 {
     public static class Database
     {
-        static string site = "http://localhost/302test/";
+        //static string site = "http://localhost/302test/";
         //static string site = "http://10.1.1.226/302test/";
+        static string site = "https://creativesolutionsmurdoch.000webhostapp.com/pointlight/";
 
 
         //DATA INSERTION
@@ -22,9 +25,11 @@ namespace SportsKinematics.Server
                 parameters.Add("username", username);
                 parameters.Add("email", email);
                 parameters.Add("password", password.GetHashCode().ToString());
-
+                
                 try
                 {
+                    InitiateSSLTrust();
+                    Debug.Log(site + "scripts/InsertUser.php" + username + " " + email + " " + password.GetHashCode().ToString());
                     byte[] result = client.UploadValues(site + "scripts/InsertUser.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -34,6 +39,7 @@ namespace SportsKinematics.Server
                     Console.WriteLine("Server connection error.");
                 }
             }
+            Debug.Log(s);
             return s;
         }
 
@@ -50,6 +56,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertRecording.php", parameters);
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
                 }
@@ -75,6 +82,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertExperiment.php", parameters);
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
                 }
@@ -98,6 +106,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertStudy.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -121,6 +130,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertPlaylist.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -145,6 +155,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertExpPlaylist.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -170,6 +181,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertResults.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -185,6 +197,9 @@ namespace SportsKinematics.Server
         //UPDATE DATA
         public static int UpdateUser(string username, string email, string password)
         {
+            User a = SelectUser(username);
+            
+
             int s = -1;
             using (var client = new WebClient())
             {
@@ -192,10 +207,18 @@ namespace SportsKinematics.Server
 
                 parameters.Add("username", username);
                 parameters.Add("email", email);
-                parameters.Add("password", password.GetHashCode().ToString());
+                if (a.Password == password)
+                {
+                    parameters.Add("password", a.Password);
+                }
+                else
+                {
+                    parameters.Add("password", password.GetHashCode().ToString());
+                }
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/UpdateUser.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -221,6 +244,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/Login.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -245,6 +269,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/PlaylistExist.php", "POST", parameters);
 
                     if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length)) == 1)
@@ -276,6 +301,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/UserExist.php", "POST", parameters);
 
                     if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length))==1)
@@ -286,6 +312,7 @@ namespace SportsKinematics.Server
                     {
                         s = false;
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -308,6 +335,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
+                    InitiateSSLTrust();
                     string userStr = "";
                     byte[] result = client.UploadValues(site + "scripts/SelectUser.php", "POST", parameters);
 
@@ -324,6 +352,23 @@ namespace SportsKinematics.Server
             }
 
             return tmp;
+        }
+
+        public static void InitiateSSLTrust()
+        {
+            try
+            {
+                //Change SSL checks so that all checks pass
+                ServicePointManager.ServerCertificateValidationCallback =
+                   new RemoteCertificateValidationCallback(
+                        delegate
+                        { return true; }
+                    );
+            }
+            catch (Exception ex)
+            {
+                //ActivityLog.InsertSyncActivity(ex);
+            }
         }
     }
 }

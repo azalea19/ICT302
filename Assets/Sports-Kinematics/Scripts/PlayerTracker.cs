@@ -94,9 +94,11 @@ namespace SportsKinematics
             //m_yFocal = m_sensor.CoordinateMapper.GetDepthCameraIntrinsics().FocalLengthY;
             //m_xFocalInv = 1.0f / m_xFocal;
             //m_yFocalInv = 1.0f / m_yFocal;
-
-            m_KinectFacade.MultiManager.KinectSensor.Open();
-            m_colourReader = m_KinectFacade.MultiManager.KinectSensor.ColorFrameSource.OpenReader();
+            if (m_KinectFacade != null && m_KinectFacade.MultiManager != null && m_KinectFacade.MultiManager.KinectSensor != null)
+            {
+                m_KinectFacade.MultiManager.KinectSensor.Open();
+                m_colourReader = m_KinectFacade.MultiManager.KinectSensor.ColorFrameSource.OpenReader();
+            }
 
             //m_handTran = new GameObject().transform;
             //m_colourReader.FrameArrived += colourReader_ColorFrameArrived;            
@@ -210,56 +212,56 @@ namespace SportsKinematics
         //        m_handTran.position.Set(-handPoint.X * m_scalingFactor, handPoint.Y * m_scalingFactor, handPoint.Z * m_scalingFactor);
         //        m_striker.GetComponentInChildren<StrikerRenderer>().CreateStriker(m_handTran, true);
 
-                /**ALL ATTACHED COMMENTS ARE AN APPROACH TO cOLOUR TRACKING AND ARE HIGHLY UNSTABLE**/
+        /**ALL ATTACHED COMMENTS ARE AN APPROACH TO cOLOUR TRACKING AND ARE HIGHLY UNSTABLE**/
 
-                //Point m_pixLocation;
-                //CameraSpacePoint handPoint = new CameraSpacePoint();
-                //ColorSpacePoint colPoint = new ColorSpacePoint();
+        //Point m_pixLocation;
+        //CameraSpacePoint handPoint = new CameraSpacePoint();
+        //ColorSpacePoint colPoint = new ColorSpacePoint();
 
-                //int width = frame.FrameDescription.Width;
-                //int height = frame.FrameDescription.Height;
+        //int width = frame.FrameDescription.Width;
+        //int height = frame.FrameDescription.Height;
 
-                //m_imgHeightHalf = height /2;
-                //m_imgWidthHalf = width /2; // halve the dimensions of the frame. Frame indexes are 0 to n-1, but IR camera operates from -2 to 2. Adding half n to IR.X and IR.Y will normalise the range to 0 to 4
+        //m_imgHeightHalf = height /2;
+        //m_imgWidthHalf = width /2; // halve the dimensions of the frame. Frame indexes are 0 to n-1, but IR camera operates from -2 to 2. Adding half n to IR.X and IR.Y will normalise the range to 0 to 4
 
-                //if (m_handRight)
-                //    handPoint = m_KinectFacade.BodyView.GetComponentInChildren<BodySourceView>().GetJoint(Windows.Kinect.JointType.HandRight).Position;
-                //else
-                //    handPoint = m_KinectFacade.BodyView.GetComponentInChildren<BodySourceView>().GetJoint(Windows.Kinect.JointType.HandLeft).Position;
+        //if (m_handRight)
+        //    handPoint = m_KinectFacade.BodyView.GetComponentInChildren<BodySourceView>().GetJoint(Windows.Kinect.JointType.HandRight).Position;
+        //else
+        //    handPoint = m_KinectFacade.BodyView.GetComponentInChildren<BodySourceView>().GetJoint(Windows.Kinect.JointType.HandLeft).Position;
 
-                //float camPixelWidth = 0.000028f;
-                //float camPixelHeight = (width/height) * camPixelWidth;
+        //float camPixelWidth = 0.000028f;
+        //float camPixelHeight = (width/height) * camPixelWidth;
 
-                //colPoint = m_sensor.CoordinateMapper.MapCameraPointToColorSpace(handPoint);
+        //colPoint = m_sensor.CoordinateMapper.MapCameraPointToColorSpace(handPoint);
 
-                //byte[] data = new byte[width * height * Image.GetPixelFormatSize(PixelFormat.Format32bppRgb) / 8]; //Bits in a byte
+        //byte[] data = new byte[width * height * Image.GetPixelFormatSize(PixelFormat.Format32bppRgb) / 8]; //Bits in a byte
 
-                //frame.CopyConvertedFrameDataToArray(data, ColorImageFormat.Bgra);
+        //frame.CopyConvertedFrameDataToArray(data, ColorImageFormat.Bgra);
 
-                //Bitmap bitmap = new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppRgb);
+        //Bitmap bitmap = new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppRgb);
 
-                //BitmapData bitmapData = bitmap.LockBits(
-                //    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                //    ImageLockMode.WriteOnly,
-                //    bitmap.PixelFormat);
-                //Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
-                //bitmap.UnlockBits(bitmapData);
+        //BitmapData bitmapData = bitmap.LockBits(
+        //    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+        //    ImageLockMode.WriteOnly,
+        //    bitmap.PixelFormat);
+        //Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
+        //bitmap.UnlockBits(bitmapData);
 
-                //imageFrame = new Image<Bgr, byte>(bitmap);
+        //imageFrame = new Image<Bgr, byte>(bitmap);
 
-                //m_pixLocation = m_colTrack.FindColour(imageFrame, new Point((int)colPoint.X, (int)colPoint.Y), 50, 50, 50, 100, 100);
+        //m_pixLocation = m_colTrack.FindColour(imageFrame, new Point((int)colPoint.X, (int)colPoint.Y), 50, 50, 50, 100, 100);
 
-                //if (m_pixLocation.X != -1.0f)
-                //{
-                //    colPoint.X = (m_pixLocation.X - m_imgWidthHalf) * ((m_xFocal * camPixelWidth) * handPoint.Z);
-                //    colPoint.Y = (m_pixLocation.Y - m_imgHeightHalf) * ((m_yFocal * camPixelHeight) * handPoint.Z);
+        //if (m_pixLocation.X != -1.0f)
+        //{
+        //    colPoint.X = (m_pixLocation.X - m_imgWidthHalf) * ((m_xFocal * camPixelWidth) * handPoint.Z);
+        //    colPoint.Y = (m_pixLocation.Y - m_imgHeightHalf) * ((m_yFocal * camPixelHeight) * handPoint.Z);
 
-                //    m_handLocation.Set(-colPoint.X, -colPoint.Y, handPoint.Z * m_scalingFactor);
-                //    m_handLocation.Set(-handPoint.X * m_scalingFactor, handPoint.Y * m_scalingFactor, handPoint.Z * m_scalingFactor);
+        //    m_handLocation.Set(-colPoint.X, -colPoint.Y, handPoint.Z * m_scalingFactor);
+        //    m_handLocation.Set(-handPoint.X * m_scalingFactor, handPoint.Y * m_scalingFactor, handPoint.Z * m_scalingFactor);
 
-                //    m_striker.GetComponentInChildren<Striker>().DrawPaddle(m_handLocation);
-                //}
-            //}
+        //    m_striker.GetComponentInChildren<Striker>().DrawPaddle(m_handLocation);
+        //}
+        //}
         //}
     }
 }

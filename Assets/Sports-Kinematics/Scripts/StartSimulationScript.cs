@@ -12,11 +12,11 @@ namespace SportsKinematics.UI
         /// <summary>
         /// Callback to load simulation scene
         /// </summary>
-        public void TaskOnClick()
+        public void TaskOnClick(GameObject Popup)
         {
             PlayerPrefs.SetInt("ScenarioIndex", 0);
 
-            GetComponent<ButtonManager>().LoadLevel();
+            GetComponent<ButtonManager>().LoadLevel(Popup);
         }
     }
 }

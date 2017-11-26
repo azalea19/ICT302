@@ -19,6 +19,7 @@ namespace SportsKinematics.UI
         /// </summary>
         void Start()
         {
+            if(m_password != null)
             m_password.asteriskChar = char.Parse(char.ConvertFromUtf32(8226));
         }
     }
