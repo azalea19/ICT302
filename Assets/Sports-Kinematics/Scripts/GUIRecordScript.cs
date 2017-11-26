@@ -51,7 +51,7 @@ namespace SportsKinematics.UI
             }
             else
             {
-                m_text.GetComponentInChildren<Text>().text = "Log";
+                m_text.GetComponentInChildren<Text>().text = "Record";
             }
         }
 

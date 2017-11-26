@@ -278,6 +278,16 @@ namespace SportsKinematics.Server
 
         public static bool UserExist(string username)
         {
+            //DirectoryInfo dir = new DirectoryInfo(Application.dataPath + "/../Users/");
+            //DirectoryInfo[] info = dir.GetDirectories();
+            //for (int i = 0; i < info.Length; i++)
+            //{
+            //    if (username.ToLower() == info[i].Name.ToLower())
+            //    {
+            //        PlayerPrefs.SetString("CurrentUsername", username);
+            //        return true;
+            //    }
+            //}
             string f = "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/things/" + "File.ext";
             string paths = f.Substring(0, f.LastIndexOf("/")+1);
             string file = f.Substring(f.LastIndexOf("/")+1);

@@ -33,8 +33,10 @@ namespace SportsKinematics
         /// </summary>
         public void SetCurrentUserDataPath()
         {
-            PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/" + m_myUser.Username + "/");
-            PlayerPrefs.SetString("CurrentUsername", m_myUser.Username);
+            //PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/" + m_myUser.Username + "/");
+            //PlayerPrefs.SetString("CurrentUsername", m_myUser.Username);
+            PlayerPrefs.SetString("CurrentUsername", "Olesia");
+            PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/Olesia/");
         }
 
         /// <summary>

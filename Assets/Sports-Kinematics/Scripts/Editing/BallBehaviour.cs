@@ -63,7 +63,7 @@ namespace SportsKinematics
         {
             Reset();
             Vector3 direction = m_destination - transform.position;
-            Debug.Log("ball speed" + m_ballSpeed);
+           // Debug.Log("ball speed" + m_ballSpeed);
             transform.position = m_destination + GameObject.Find("PaddleParent").transform.forward;
             float m_speed = Vector3.Distance(m_destination, transform.position) / 0.05f;
             m_speed /= (1.0f / (m_ballSpeed/100));

@@ -40,7 +40,7 @@ namespace SportsKinematics.UI
                 m_finalSceneBool = true;
             }else
             {
-                Debug.Log("pLAYLIST: "+GameObject.Find("SimulationManager").GetComponent<SimulationManager>().GetPlaylistCount());
+                //Debug.Log("pLAYLIST: "+GameObject.Find("SimulationManager").GetComponent<SimulationManager>().GetPlaylistCount());
             }
         }
 

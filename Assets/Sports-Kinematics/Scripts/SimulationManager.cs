@@ -71,7 +71,7 @@ namespace SportsKinematics
         {
             m_fileName = PlayerPrefs.GetString("PlaylistPath");
             m_scenarioIndex = PlayerPrefs.GetInt("ScenarioIndex");
-            Debug.Log("Scenario index " + m_scenarioIndex);
+            //Debug.Log("Scenario index " + m_scenarioIndex);
             m_renderer = m_actionRenderer.GetComponent<ActionRenderer>();
             m_currentPlaylist = LoadPlaylist(m_fileName);
             string[] actionData = m_currentPlaylist.Scenarios[m_scenarioIndex].actionDataPaths;

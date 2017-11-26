@@ -35,5 +35,8 @@ public class PlayerPrefsHelper : MonoBehaviour
         PlayerPrefs.DeleteKey("EmailAddress");
 
         PlayerPrefs.SetInt("ScenarioIndex", 0);
+
+        PlayerPrefs.SetString("CurrentUsername", "Olesia");
+        PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/Olesia/");
     }
 }

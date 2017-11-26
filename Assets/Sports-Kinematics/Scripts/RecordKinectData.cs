@@ -113,6 +113,27 @@ namespace SportsKinematics
             m_depthData = new List<ushort[]>();
         }
 
+        public static bool isConnected()
+        {
+            KinectSensor device = KinectSensor.GetDefault();
+            
+            
+            if (device != null)
+            {
+                if (!device.IsOpen)
+                {
+                    device.Open();
+                }
+                if (device.IsAvailable)
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool isActive()
+        {
+            return (isConnected() && KinectSensor.GetDefault().IsOpen);
+        }
         /// <summary>
         /// Updates the stringbuilder containing the kinect data if
         /// in store mode, otherwise will save data if in saved mode

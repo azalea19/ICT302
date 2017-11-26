@@ -48,6 +48,11 @@ namespace SportsKinematics.UI
         /// </summary>
         static private Text m_uiText;
 
+        /// <summary>
+        /// Allows to make sure that the previous hint was disabled.
+        /// </summary>
+        static private HintScript m_hide;
+
         // Use this for initialization
         void Start()
         {
@@ -82,10 +87,17 @@ namespace SportsKinematics.UI
         /// </summary>
         public void EnterEvent()
         {
+            if (m_hide != null && this != m_hide)
+            {
+                m_hide.ExitEvent();
+            }
+            m_hide = this;
             m_counter = Time.timeSinceLevelLoad;
             m_uiText.text = m_text;
             m_displayInfo = true;
             m_hint.gameObject.SetActive(false);
+
+            Debug.Log("se");
         }
 
         /// <summary>
@@ -94,7 +106,8 @@ namespace SportsKinematics.UI
         public void ExitEvent()
         {
             m_displayInfo = false;
-            m_hint.gameObject.SetActive(false);
+            if (m_hint)
+                m_hint.gameObject.SetActive(false);
 
         }
     }
