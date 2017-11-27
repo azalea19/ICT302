@@ -60,60 +60,7 @@ namespace SportsKinematics.UI
             {
                 StartCoroutine("Wait", Popup);
             }
-<<<<<<< HEAD
-=======
         }
-
-        /// <summary>
-        /// Allows to run the script twice after one frame has passed to verify the status of the hardware after one second.
-        /// If the hardware is still not available an error will pop up to notify the user.
-        /// </summary>
-        /// <param name="Popup">Reference to a game object which holds an error popup.</param>
-        /// <returns></returns>
-        public IEnumerator Wait(GameObject Popup)
-        {
-            if (m_level == "Record")
-            {
-                if (!RecordKinectData.isConnected())
-                {
-                    yield return new WaitForSeconds(1.0f);
-                    //check again
-                    if (!RecordKinectData.isConnected())
-                    {
-                        Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! Kinect V2 is not available.";
-                        m_canvas = "MainMenuCanvas";
-                        CreatePopup(Popup);
-                        m_Popup.SetActive(true);
-                    }
-                    else
-                    {
-                        SceneManager.LoadSceneAsync(m_level);
-                    }
-                }
-                else
-                {
-                    SceneManager.LoadSceneAsync(m_level);
-                }
-            }
-            else if (m_level == "Simulation")
-            {
-                string model = UnityEngine.VR.VRDevice.model;
-                if (model == null || !model.Contains("Vive"))
-                {
-                    Popup.transform.Find("Popup/ErrorLabel").GetComponent<Text>().text = "Error! HTC Vive is not available.";
-                    m_canvas = "SimulationCanvas";
-                    CreatePopup(Popup);
-                    m_Popup.SetActive(true);
-                }
-                else
-                {
-                    SceneManager.LoadSceneAsync(m_level);
-                }
-            }
->>>>>>> ServerFunctionality
-        }
-
-
 
         /// <summary>
         /// Allows to run the script twice after one frame has passed to verify the status of the hardware after one second.

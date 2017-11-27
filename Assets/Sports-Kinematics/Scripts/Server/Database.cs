@@ -3,22 +3,17 @@ using System.Net;
 using System.Collections.Specialized;
 using System.IO;
 using UnityEngine;
-<<<<<<< HEAD
-=======
 using System.Net.Security;
->>>>>>> ServerFunctionality
 
 namespace SportsKinematics.Server
 {
     public static class Database
     {
         //static string site = "http://localhost/302test/";
-<<<<<<< HEAD
-        static string site = "http://10.1.1.226/302test/";
-=======
+
         //static string site = "http://10.1.1.226/302test/";
         static string site = "https://creativesolutionsmurdoch.000webhostapp.com/pointlight/";
->>>>>>> ServerFunctionality
+
 
 
         //DATA INSERTION
@@ -32,17 +27,12 @@ namespace SportsKinematics.Server
                 parameters.Add("username", username);
                 parameters.Add("email", email);
                 parameters.Add("password", password.GetHashCode().ToString());
-<<<<<<< HEAD
 
-                try
-                {
-=======
                 
                 try
                 {
                     InitiateSSLTrust();
                     Debug.Log(site + "scripts/InsertUser.php" + username + " " + email + " " + password.GetHashCode().ToString());
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertUser.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -52,10 +42,7 @@ namespace SportsKinematics.Server
                     Console.WriteLine("Server connection error.");
                 }
             }
-<<<<<<< HEAD
-=======
             Debug.Log(s);
->>>>>>> ServerFunctionality
             return s;
         }
 
@@ -72,10 +59,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertRecording.php", parameters);
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
                 }
@@ -101,10 +85,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertExperiment.php", parameters);
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
                 }
@@ -128,10 +109,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertStudy.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -155,10 +133,8 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
+
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertPlaylist.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -182,11 +158,7 @@ namespace SportsKinematics.Server
                 parameters.Add("expId", expId.ToString());
 
                 try
-                {
-<<<<<<< HEAD
-=======
-                    InitiateSSLTrust();
->>>>>>> ServerFunctionality
+                {      InitiateSSLTrust();
                     byte[] result = client.UploadValues(site + "scripts/InsertExpPlaylist.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -212,10 +184,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/InsertResults.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -252,10 +221,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/UpdateUser.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -281,10 +247,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/Login.php", "POST", parameters);
 
                     s = Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length));
@@ -309,10 +272,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/PlaylistExist.php", "POST", parameters);
 
                     if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length)) == 1)
@@ -335,7 +295,7 @@ namespace SportsKinematics.Server
 
         public static bool UserExist(string username)
         {
-<<<<<<< HEAD
+
             //DirectoryInfo dir = new DirectoryInfo(Application.dataPath + "/../Users/");
             //DirectoryInfo[] info = dir.GetDirectories();
             //for (int i = 0; i < info.Length; i++)
@@ -345,14 +305,12 @@ namespace SportsKinematics.Server
             //        PlayerPrefs.SetString("CurrentUsername", username);
             //        return true;
             //    }
-            //}
-            string f = "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/things/" + "File.ext";
-            string paths = f.Substring(0, f.LastIndexOf("/")+1);
-            string file = f.Substring(f.LastIndexOf("/")+1);
-            Debug.Log(paths + " : " + file);
-
-=======
->>>>>>> ServerFunctionality
+            ////}
+            //string f = "../Users/" + PlayerPrefs.GetString("CurrentUsername") + "/Actions/things/" + "File.ext";
+            //string paths = f.Substring(0, f.LastIndexOf("/")+1);
+            //string file = f.Substring(f.LastIndexOf("/")+1);
+            //Debug.Log(paths + " : " + file);
+            
             bool s = false;
             using (var client = new WebClient())
             {
@@ -362,10 +320,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     byte[] result = client.UploadValues(site + "scripts/UserExist.php", "POST", parameters);
 
                     if (Convert.ToInt32(System.Text.Encoding.UTF8.GetString(result, 0, result.Length))==1)
@@ -399,10 +354,7 @@ namespace SportsKinematics.Server
 
                 try
                 {
-<<<<<<< HEAD
-=======
                     InitiateSSLTrust();
->>>>>>> ServerFunctionality
                     string userStr = "";
                     byte[] result = client.UploadValues(site + "scripts/SelectUser.php", "POST", parameters);
 
@@ -420,8 +372,6 @@ namespace SportsKinematics.Server
 
             return tmp;
         }
-<<<<<<< HEAD
-=======
 
         public static void InitiateSSLTrust()
         {
@@ -439,6 +389,5 @@ namespace SportsKinematics.Server
                 //ActivityLog.InsertSyncActivity(ex);
             }
         }
->>>>>>> ServerFunctionality
     }
 }
