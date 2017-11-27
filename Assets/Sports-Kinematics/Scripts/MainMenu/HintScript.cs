@@ -97,7 +97,11 @@ namespace SportsKinematics.UI
             m_displayInfo = true;
             m_hint.gameObject.SetActive(false);
 
+<<<<<<< HEAD
             Debug.Log("se");
+=======
+            //Debug.Log("se");
+>>>>>>> ServerFunctionality
         }
 
         /// <summary>

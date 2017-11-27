@@ -8,7 +8,12 @@ namespace SportsKinematics.Server
     class Files
     {
         //static string site = "http://localhost/302test/";
+<<<<<<< HEAD
         static string site = "http://10.1.1.226/302test/";
+=======
+        //static string site = "http://10.1.1.226/302test/";
+        static string site = "https://creativesolutionsmurdoch.000webhostapp.com/pointlight/";
+>>>>>>> ServerFunctionality
 
         public static string UploadFile(string frompath,string topath,string filename)
         {
@@ -42,5 +47,22 @@ namespace SportsKinematics.Server
 
             return s;
         }
+<<<<<<< HEAD
+=======
+
+        public static void DownloadFile(string frompath, string topath, string filename)
+        {
+            using (var client = new WebClient())
+            {
+                if (!Directory.Exists(topath))
+                {
+                    Directory.CreateDirectory(topath);
+                }
+                client.DownloadFile(frompath + "/" + filename, topath + "/" + filename);
+            }
+
+            
+        }
+>>>>>>> ServerFunctionality
     }
 }
