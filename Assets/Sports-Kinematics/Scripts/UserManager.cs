@@ -33,8 +33,10 @@ namespace SportsKinematics
         /// </summary>
         public void SetCurrentUserDataPath()
         {
-            PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/" + m_myUser.Username + "/");
-            PlayerPrefs.SetString("CurrentUsername", m_myUser.Username);
+            //PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/" + m_myUser.Username + "/");
+            //PlayerPrefs.SetString("CurrentUsername", m_myUser.Username);
+            PlayerPrefs.SetString("CurrentUsername", "Olesia");
+            PlayerPrefs.SetString("CurrentUserDataPath", Application.dataPath + "/../Users/Olesia/");
         }
 
         /// <summary>
@@ -45,13 +47,16 @@ namespace SportsKinematics
         public void Save(User u)
         {
             m_myUser = new User();
-
-            m_myUser.Username = Encryption.XOR(u.Username);
-            m_myUser.Password = Encryption.XOR(u.Password);
-            m_myUser.Email = Encryption.XOR(u.Email);
-
-            Serial<User>.Save(m_myUser, u.Username + ".shri", Application.dataPath + "/../Users/" + u.Username + "/");
-
+            
+            if (Server.Database.UserExist(u.Username))
+            {
+                Server.Database.UpdateUser(u.Username, u.Email, u.Password);                
+            }
+            else
+            {
+                Server.Database.AddUser(u.Username, u.Email, u.Password);
+            }
+            
             m_myUser = u;
         }
 
@@ -73,12 +78,17 @@ namespace SportsKinematics
         /// <returns>Specific users data</returns>
         public User Load(string username)
         {
-            m_myUser = Serial<User>.Load(username + ".shri", Application.dataPath + "/../Users/" + username + "/");
+            //m_myUser = Serial<User>.Load(username + ".shri", Application.dataPath + "/../Users/" + username + "/");
+            m_myUser = Server.Database.SelectUser(username);
 
-            m_myUser.Username = Encryption.XOR(m_myUser.Username);
-            m_myUser.Password = Encryption.XOR(m_myUser.Password);
-            m_myUser.Email = Encryption.XOR(m_myUser.Email);
+            //m_myUser.Username = Encryption.XOR(m_myUser.Username);
+            //m_myUser.Password = Encryption.XOR(m_myUser.Password);
+            //m_myUser.Email = Encryption.XOR(m_myUser.Email);
 
+            m_myUser.Username = m_myUser.Username;
+            m_myUser.Password = m_myUser.Password;
+            m_myUser.Email = m_myUser.Email;
+            
             return m_myUser;
         }
 

@@ -12,6 +12,12 @@ public class BodySourceView : MonoBehaviour
 
     private GameObject m_trackedBody;
 
+    /// <summary>
+    /// the scale of the tracked body.
+    /// </summary>
+    private static float m_multiplier = 70.0f;
+    private static float m_yPosition = 30.0f;
+
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         { Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft },
@@ -126,7 +132,6 @@ public class BodySourceView : MonoBehaviour
     private GameObject CreateBodyObject(ulong id)
     {
         GameObject body = new GameObject("Body:" + id);
-
         for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
         {
             GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -134,10 +139,10 @@ public class BodySourceView : MonoBehaviour
             LineRenderer lr = jointObj.AddComponent<LineRenderer>();
             lr.positionCount = 2;
             lr.material = BoneMaterial;
-            lr.startWidth = 0.05f;
-            lr.endWidth = 0.05f;
+            lr.startWidth = 0.09f;
+            lr.endWidth = 0.09f;
 
-            jointObj.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            //jointObj.transform.localScale = new Vector3(.6f, .6f, .6f);
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
         }
@@ -158,7 +163,7 @@ public class BodySourceView : MonoBehaviour
                 targetJoint = body.Joints[_BoneMap[jt]];
             }
 
-            Transform jointObj = bodyObject.transform.FindChild(jt.ToString());
+            Transform jointObj = bodyObject.transform.Find(jt.ToString());
             jointObj.localPosition = GetVector3FromJoint(sourceJoint);
 
             LineRenderer lr = jointObj.GetComponent<LineRenderer>();
@@ -237,9 +242,9 @@ public class BodySourceView : MonoBehaviour
     }
 
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
-    {
+    {        
         //X * -10 fixes the mirrored output of recording. No easy fix, it seems. - Aiden
         //Previously (KV1), this was acheived via a boolean. KV2 removed that.
-        return new Vector3(joint.Position.X * -10, joint.Position.Y * 10, joint.Position.Z * 10);
+        return new Vector3(joint.Position.X * -m_multiplier, joint.Position.Y * m_multiplier + m_yPosition, joint.Position.Z * m_multiplier);
     }
 }

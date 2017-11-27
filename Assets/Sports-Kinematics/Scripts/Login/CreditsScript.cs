@@ -2,34 +2,62 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 /// <summary>
+/// The class allows to easily add new stakeholders to the 
+/// project which will be displayed on the credits screen.
 /// Author: Olesia Kochergina
 /// Date: 16/09/2017
 /// </summary>
 public class CreditsScript : MonoBehaviour
 {
-
-
     /// <summary>
     /// (roles, array of with a specific role)
     /// </summary>
     private Dictionary<string, string[]> m_credits;
 
+    /// <summary>
+    /// Reference to the roles game objects.
+    /// </summary>
     private GameObject m_rolesGO;
+
+    /// <summary>
+    /// Reference to the contributors game object.
+    /// </summary>
     private GameObject m_contrGO;
 
+    /// <summary>
+    /// Current position of the roles game object.
+    /// </summary>
     private Vector3 m_rolesPos;
+
+    /// <summary>
+    /// Current position of the contributor game object.
+    /// </summary>
     private Vector3 m_contrPos;
+
+    /// <summary>
+    /// initial y-axis position of the roles game object
+    /// </summary>
     private float m_initRolesPosY;
+
+    /// <summary>
+    /// initial y-axis position of the contributor game object.
+    /// </summary>
     private float m_initContrPosY;
 
+    /// <summary>
+    /// the last visible row
+    /// </summary>
     private float m_offset;
 
-    // Use this for initialization
+    /// <summary>
+    /// Initializes the instance's variables.
+    /// </summary>
     void Start()
     {
-        m_rolesGO = gameObject.transform.FindChild("Roles").gameObject;
-        m_contrGO = gameObject.transform.FindChild("Contributors").gameObject;
+        m_rolesGO = gameObject.transform.Find("Roles").gameObject;
+        m_contrGO = gameObject.transform.Find("Contributors").gameObject;
 
         m_credits = new Dictionary<string, string[]>();
         AddRoles();
@@ -45,11 +73,18 @@ public class CreditsScript : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Sets the initial position of the credits text.
+    /// </summary>
     void OnEnable()
     {
         m_rolesPos.y = m_initRolesPosY;
         m_contrPos.y = m_initContrPosY;
     }
+
+    /// <summary>
+    /// Allows for the credits page to be automatically scrolled vertically.
+    /// </summary>
     void Update()
     {
         m_contrPos.y += 0.01f;
@@ -64,13 +99,16 @@ public class CreditsScript : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Adds roles to different stakeholders of the project.
+    /// </summary>
     private void AddRoles()
     {
         string[] client = { "Dr. Sean Muller" };
-        string[] supervisor = { "Dr. Shri Rai" };
+        string[] supervisor = { "Mr. Shri Rai" };
         string[] unitCoord = { "Peter Cole" };
         string[] sponsor = { "Murdoch University" };
-        string[] team = { "Maddisen Topaz", "Nathan Gane", "Olesia Kochergina", "Mason Tolman", "Samuel Brownley" };
+        string[] team = { "Samuel Brownley", "Nathan Gane", "Olesia Kochergina" };
         string[] pTeam = {"Kinematics Research Solutions" };
         string[] testers = { "Oleg McNabb", "Mark Burns", "Jolon Theodore Martin", "Jordan Gumina-Wright", "Hugo Wai", "Aria Geramizadegan", "Joshua Jiow" };
 
@@ -85,7 +123,10 @@ public class CreditsScript : MonoBehaviour
     }
 
     
-
+    /// <summary>
+    /// Edits the text to be displayed to improve the visual appeal of it.
+    /// </summary>
+    /// <returns></returns>
     private int DisplayCredits()
     {
         int rows = 0;

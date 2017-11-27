@@ -33,6 +33,7 @@ namespace SportsKinematics.UI
         /// </summary>
         void Start()
         {
+            if(m_canvasToActivate)
             m_canvasToActivate.gameObject.SetActive(false);
         }
 
@@ -89,7 +90,7 @@ namespace SportsKinematics.UI
 
             m_userManager.GetComponent<UserManager>().Load(username);
 
-            m_mainMenu.transform.FindChild("WelcomeText").GetComponent<Text>().text = "Welcome,\n" + nameFinal;
+            m_mainMenu.transform.Find("WelcomeText").GetComponent<Text>().text = "Welcome, " + nameFinal;
             Switch();
         }
     }
